@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">AliMinder</string>
+    
+    <!-- Persona Stage Labels -->
+    <string name="persona_optimistic">Optimistic</string>
+    <string name="persona_weary">Weary</string>
+    <string name="persona_grave">Grave</string>
+    
+    <!-- Navigation Labels -->
+    <string name="nav_all">ALL</string>
+    <string name="nav_filters">Filters</string>
+    <string name="nav_add">Add</string>
+    <string name="nav_settings">Settings</string>
+    
+    <!-- Screen Titles -->
+    <string name="screen_all_title">Unified Sentinel</string>
+    <string name="screen_sin_group_title">Sin Group</string>
+    <string name="screen_repercussions_title">Hardwired Fears</string>
+    <string name="screen_providers_title">Provider Health</string>
+    <string name="screen_ponr_math_title">PoNR Calculation</string>
+    <string name="screen_settings_title">Settings</string>
+    
+    <!-- PoNR Display -->
+    <string name="ponr_label">PoNR (Leave by):</string>
+    <string name="delta_label">Time Until PoNR:</string>
+    <string name="commute_label">Commute:</string>
+    <string name="prep_label">Prep/Grooming:</string>
+    <string name="buffer_label">Buffer:</string>
+    
+    <!-- Actions -->
+    <string name="action_snooze">Snooze 10m</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    
+    <!-- Permissions -->
+    <string name="permission_usage_stats_rationale">AliMinder needs Usage Stats access to detect when you\'re in distraction apps.</string>
+    <string name="permission_location_rationale">AliMinder uses location to detect when you\'re in the office for corporate vigilance.</string>
+    <string name="permission_battery_rationale">AliMinder needs to bypass battery optimization to ensure timely interventions.</string>
+    <string name="permission_calendar_rationale">AliMinder syncs with your calendars to calculate Point of No Return.</string>
+    
+    <!-- Migration -->
+    <string name="migration_export_title">Export Data</string>
+    <string name="migration_import_title">Import Data</string>
+    <string name="migration_qr_method">QR Code Transfer</string>
+    <string name="migration_file_method">Export to File</string>
+    <string name="migration_checksum_label">Checksum:</string>
+    
+    <!-- Error Messages -->
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_permission_denied">Permission denied. AliMinder needs this to function.</string>
+    <string name="error_calendar_sync">Failed to sync calendar. Check your connection.</string>
+</resources>

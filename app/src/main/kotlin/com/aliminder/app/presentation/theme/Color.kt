@@ -1,0 +1,34 @@
+package com.aliminder.app.presentation.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Persona stage colors (Status Rings)
+val OptimisticGreen = Color(0xFF4CAF50)
+val WearyOrange = Color(0xFFFF9800)
+val GraveRed = Color(0xFFF44336)
+
+// Primary brand colors
+val VinylPurple = Color(0xFF6200EE)
+val VinylPurpleVariant = Color(0xFF3700B3)
+val TealAccent = Color(0xFF03DAC5)
+
+// Define the new background color
+val DeepRoyalBlue = Color(0xFF002D62) 
+
+// Background colors
+val BackgroundDark = DeepRoyalBlue       // App background is now Deep Royal Blue
+val SurfaceDark = Color(0xFF121212)      // Card background remains black
+val SurfaceVariant = Color(0xFF2C2C2C)   // Elevated surfaces (remains the same)
+
+// Borders
+val BorderDark = Color(0xFF000000)           // Black border
+
+// Text colors
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xFFB3B3B3)
+val TextTertiary = Color(0xFF808080)
+
+// Provider badge colors
+val Microsoft365Blue = Color(0xFF0078D4)
+val GoogleCalendarBlue = Color(0xFF4285F4)
+val ShadowCalendarPurple = Color(0xFF9C27B0)

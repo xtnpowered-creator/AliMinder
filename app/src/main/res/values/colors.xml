@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Persona Stage Colors (Status Rings) -->
+    <color name="optimistic_green">#4CAF50</color>
+    <color name="weary_orange">#FF9800</color>
+    <color name="grave_red">#F44336</color>
+    
+    <!-- Primary Brand Colors -->
+    <color name="vinyl_purple">#6200EE</color>
+    <color name="vinyl_purple_variant">#3700B3</color>
+    <color name="teal_accent">#03DAC5</color>
+    
+    <!-- Background Colors -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="surface_variant">#2C2C2C</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3B3B3</color>
+    <color name="text_tertiary">#808080</color>
+    
+    <!-- Provider Badge Colors -->
+    <color name="microsoft_365_blue">#0078D4</color>
+    <color name="google_calendar_blue">#4285F4</color>
+    <color name="shadow_calendar_purple">#9C27B0</color>
+</resources>
