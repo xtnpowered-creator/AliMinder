@@ -62,7 +62,9 @@ android {
             excludes += "META-INF/io.netty.versions.properties"
         }
         jniLibs {
-            useLegacyPackaging = false
+            // Changed to true to force extraction. This fixes 16KB alignment issues
+            // for older third-party libraries (like SQLCipher) that are not 16KB aligned.
+            useLegacyPackaging = true
         }
     }
 }

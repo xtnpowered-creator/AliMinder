@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aliminder.app.domain.model.PersonaStage
+import com.aliminder.app.presentation.components.AliMinderTopAppBar
+import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 import com.aliminder.app.presentation.theme.BorderDark
 import com.aliminder.app.presentation.theme.TextSecondary
 import com.aliminder.app.presentation.theme.aliMinderTopAppBarColors
@@ -23,13 +25,17 @@ import com.aliminder.app.presentation.theme.aliMinderTopAppBarColors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SoundCheckScreen(
-    viewModel: SoundCheckViewModel = hiltViewModel()
+    viewModel: SoundCheckViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel() // Inject SettingsViewModel
 ) {
     val engineStatus by viewModel.engineStatus.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val lastAction by viewModel.lastAction.collectAsState()
     val availableVoices by viewModel.availableVoices.collectAsState()
     val selectedVoice by viewModel.selectedVoice.collectAsState()
+    
+    // Get settings for dynamic top bar color
+    val userSettings by settingsViewModel.userSettings.collectAsState()
 
     var showVoiceDialog by remember { mutableStateOf(false) }
 
@@ -53,7 +59,7 @@ fun SoundCheckScreen(
                                     }
                                 }
                             )
-                            Divider()
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -68,25 +74,11 @@ fun SoundCheckScreen(
 
     Scaffold(
         topBar = {
-            Column {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxHeight()
-                        ) {
-                            Text(
-                                "Vinyl Lab (Sound Check)",
-                                fontSize = (MaterialTheme.typography.titleLarge.fontSize.value + 2).sp,
-                                textAlign = TextAlign.Center,
-                                color = TextSecondary
-                            )
-                        }
-                    },
-                    colors = aliMinderTopAppBarColors()
-                )
-                HorizontalDivider(thickness = 2.dp, color = BorderDark)
-            }
+            AliMinderTopAppBar(
+                title = "Vinyl Lab (Sound Check)",
+                overallStage = PersonaStage.OPTIMISTIC, // Static for this screen or bind to something? For now static.
+                useDynamicColor = userSettings.useDynamicTitleBarColor
+            )
         }
     ) { padding ->
         Column(
@@ -114,7 +106,7 @@ fun SoundCheckScreen(
                         fontWeight = FontWeight.Bold,
                         color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
-                    Divider(modifier = Modifier.padding(vertical = 12.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                     Text("Last Action: $lastAction", style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -171,12 +163,12 @@ fun SoundCheckScreen(
             }
             
             Button(
-                onClick = { viewModel.triggerPersona(PersonaStage.GRAVE) },
+                onClick = { viewModel.triggerPersona(PersonaStage.URGENT) }, // Fixed GRAVE -> URGENT
                 enabled = !isPlaying,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Grave (Past PoNR)")
+                Text("Urgent (Past PoNR)")
             }
 
             Spacer(modifier = Modifier.height(24.dp))

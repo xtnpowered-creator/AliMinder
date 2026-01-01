@@ -30,7 +30,9 @@ object DatabaseModule {
             context,
             AliMinderDatabase::class.java,
             "aliminder_database"
-        ).build()
+        )
+        .fallbackToDestructiveMigration() // Added this to fix the crash
+        .build()
     }
 
     @Provides

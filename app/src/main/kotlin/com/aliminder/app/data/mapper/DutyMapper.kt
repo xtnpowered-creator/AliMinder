@@ -1,24 +1,27 @@
 package com.aliminder.app.data.mapper
 
 import com.aliminder.app.data.local.entity.DutyEntity
-import com.aliminder.app.domain.model.Event
+import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PoNRCalculation
 import com.aliminder.app.domain.model.PersonaStage
 import java.time.Duration
+import java.time.LocalDateTime
 
-fun DutyEntity.toDomainEvent(): Event {
+fun DutyEntity.toDomainDuty(urgencyThresholdMinutes: Int = 60): Duty {
     // Basic PoNR calculation
     val commute = customCommuteMinutes ?: 20
     val prep = customPrepMinutes ?: 15
     val buffer = customBufferMinutes ?: 10
     val ponrTime = startTime.minusMinutes(commute.toLong() + prep.toLong() + buffer.toLong())
-    val delta = Duration.between(java.time.LocalDateTime.now(), ponrTime).toMinutes().toInt()
+    val now = LocalDateTime.now()
+    val delta = Duration.between(now, ponrTime).toMinutes().toInt()
 
-    // Determine Persona Stage based on delta
+    // Determine Persona Stage based on delta and start time
     val personaStage = when {
-        delta >= 30 -> PersonaStage.OPTIMISTIC
-        delta in 0..29 -> PersonaStage.WEARY
-        else -> PersonaStage.GRAVE
+        now.isAfter(startTime) -> PersonaStage.LATE
+        delta > urgencyThresholdMinutes -> PersonaStage.OPTIMISTIC
+        delta in 0..urgencyThresholdMinutes -> PersonaStage.WEARY
+        else -> PersonaStage.URGENT
     }
 
     // Determine Category based on acceptance status first
@@ -28,7 +31,7 @@ fun DutyEntity.toDomainEvent(): Event {
         sourceType // Fallback to sourceType (e.g., SHADOW_TASK, SHADOW_EVENT)
     }
 
-    return Event(
+    return Duty(
         id = id,
         title = title,
         description = description,
@@ -56,7 +59,7 @@ fun DutyEntity.toDomainEvent(): Event {
     )
 }
 
-fun Event.toDutyEntity(): DutyEntity {
+fun Duty.toDutyEntity(): DutyEntity {
     return DutyEntity(
         id = id,
         title = title,

@@ -2,6 +2,8 @@ package com.aliminder.app.presentation.mock
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.math.abs
 
 /**
  * Mock data models for UI development.
@@ -158,6 +160,228 @@ object MockData {
             prepMinutes = 0,
             bufferMinutes = 0,
             category = "Pending"
+        ),
+        
+        // --- NEW MOCK DATA ---
+        
+        // Tomorrow Morning - Optimistic
+        MockEvent(
+            id = "10",
+            title = "Morning Gym Session",
+            startTime = LocalDateTime.now().plusDays(1).withHour(7).withMinute(0),
+            commuteMinutes = 15,
+            prepMinutes = 10,
+            bufferMinutes = 5,
+            category = "Personal"
+        ),
+        
+        // Tomorrow Work - Optimistic
+        MockEvent(
+            id = "11",
+            title = "Code Review Meeting",
+            startTime = LocalDateTime.now().plusDays(1).withHour(10).withMinute(30),
+            commuteMinutes = 0,
+            prepMinutes = 5,
+            bufferMinutes = 0,
+            category = "Meeting"
+        ),
+        
+        // Tomorrow Afternoon - Task
+        MockEvent(
+            id = "12",
+            title = "Update Jira Tickets",
+            startTime = LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Task"
+        ),
+        
+        // Late Tonight - Optimistic
+        MockEvent(
+            id = "13",
+            title = "Dinner Prep",
+            startTime = LocalDateTime.now().plusHours(6),
+            commuteMinutes = 0,
+            prepMinutes = 30,
+            bufferMinutes = 0,
+            category = "Task"
+        ),
+        
+        // Tomorrow Evening - Social
+        MockEvent(
+            id = "14",
+            title = "Movie Night with Friends",
+            startTime = LocalDateTime.now().plusDays(1).withHour(19).withMinute(0),
+            commuteMinutes = 25,
+            prepMinutes = 15,
+            bufferMinutes = 10,
+            category = "Social"
+        ),
+        
+        // Early Morning - Weary/Urgent potential if accessed late at night
+        MockEvent(
+            id = "15",
+            title = "Flight Check-in",
+            startTime = LocalDateTime.now().plusDays(1).withHour(6).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Task"
+        ),
+        
+        // Work Block - Optimistic
+        MockEvent(
+            id = "16",
+            title = "Deep Work: Architecture",
+            startTime = LocalDateTime.now().plusDays(1).withHour(13).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 10,
+            bufferMinutes = 0,
+            category = "Work"
+        ),
+        
+        // Short Notice - Weary
+        MockEvent(
+            id = "17",
+            title = "Quick Sync",
+            startTime = LocalDateTime.now().plusHours(1).plusMinutes(15),
+            commuteMinutes = 0,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Meeting"
+        ),
+        
+        // Tomorrow - Pending
+        MockEvent(
+            id = "18",
+            title = "Doctor Follow-up (Tentative)",
+            startTime = LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
+            commuteMinutes = 20,
+            prepMinutes = 0,
+            bufferMinutes = 5,
+            category = "Pending"
+        ),
+        
+        // Day after tomorrow - Optimistic
+        MockEvent(
+            id = "19",
+            title = "Quarterly Planning",
+            startTime = LocalDateTime.now().plusDays(2).withHour(9).withMinute(0),
+            commuteMinutes = 30,
+            prepMinutes = 15,
+            bufferMinutes = 10,
+            category = "Meeting"
+        ),
+        
+        // Day after tomorrow - Task
+        MockEvent(
+            id = "20",
+            title = "Pay Utility Bills",
+            startTime = LocalDateTime.now().plusDays(2).withHour(12).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 5,
+            bufferMinutes = 0,
+            category = "Task"
+        ),
+        
+        // Near Future - Task
+        MockEvent(
+            id = "21",
+            title = "Water Plants",
+            startTime = LocalDateTime.now().plusHours(3).plusMinutes(30),
+            commuteMinutes = 0,
+            prepMinutes = 10,
+            bufferMinutes = 0,
+            category = "Task"
+        ),
+        
+        // Tomorrow - Social
+        MockEvent(
+            id = "22",
+            title = "Coffee with Mentor",
+            startTime = LocalDateTime.now().plusDays(1).withHour(8).withMinute(30),
+            commuteMinutes = 15,
+            prepMinutes = 5,
+            bufferMinutes = 5,
+            category = "Social"
+        ),
+        
+        // Day after tomorrow - Personal
+        MockEvent(
+            id = "23",
+            title = "Grocery Shopping",
+            startTime = LocalDateTime.now().plusDays(2).withHour(17).withMinute(30),
+            commuteMinutes = 10,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Task"
+        ),
+        
+        // Tomorrow - Work
+        MockEvent(
+            id = "24",
+            title = "Team Retro",
+            startTime = LocalDateTime.now().plusDays(1).withHour(16).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 5,
+            bufferMinutes = 0,
+            category = "Meeting"
+        ),
+        
+        // Day after tomorrow - Optimistic
+        MockEvent(
+            id = "25",
+            title = "Workshop: Kotlin Flows",
+            startTime = LocalDateTime.now().plusDays(2).withHour(11).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Work"
+        ),
+        
+        // Tonight - Task
+        MockEvent(
+            id = "26",
+            title = "Journaling",
+            startTime = LocalDateTime.now().plusHours(8),
+            commuteMinutes = 0,
+            prepMinutes = 15,
+            bufferMinutes = 0,
+            category = "Personal"
+        ),
+        
+        // Tomorrow - Pending
+        MockEvent(
+            id = "27",
+            title = "Lunch & Learn (Invite)",
+            startTime = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Pending"
+        ),
+        
+        // Day after tomorrow - Social
+        MockEvent(
+            id = "28",
+            title = "Game Night",
+            startTime = LocalDateTime.now().plusDays(2).withHour(20).withMinute(0),
+            commuteMinutes = 20,
+            prepMinutes = 30,
+            bufferMinutes = 0,
+            category = "Social"
+        ),
+        
+        // Late tomorrow - Task
+        MockEvent(
+            id = "29",
+            title = "Prepare Presentation Deck",
+            startTime = LocalDateTime.now().plusDays(1).withHour(21).withMinute(0),
+            commuteMinutes = 0,
+            prepMinutes = 0,
+            bufferMinutes = 0,
+            category = "Task"
         )
     )
     
@@ -224,10 +448,53 @@ object MockData {
     
     // Helper to format delta display
     fun formatDelta(minutes: Long): String {
-        return when {
-            minutes > 0 -> "T-${minutes}m"
-            minutes == 0L -> "NOW"
-            else -> "LATE ${-minutes}m"
+        val absMinutes = abs(minutes)
+        val days = absMinutes / (24 * 60)
+        val remainingMinutes = absMinutes % (24 * 60)
+        val hours = remainingMinutes / 60
+        val mins = remainingMinutes % 60
+        
+        return if (minutes >= 0) {
+            // Future
+            if (days > 0) {
+                String.format(Locale.US, "%d days\n%02d:%02d", days, hours, mins)
+            } else {
+                String.format(Locale.US, "%02d:%02d", hours, mins)
+            }
+        } else {
+            // Late (Negative) - No days for late items, as they are filtered out
+            String.format(Locale.US, "RUSH\n%02d:%02d", hours, mins)
+        }
+    }
+
+    // Helper to format delta display with PersonaStage awareness
+    fun formatDelta(minutes: Long, stage: com.aliminder.app.domain.model.PersonaStage): String {
+        val absMinutes = abs(minutes)
+        val days = absMinutes / (24 * 60)
+        val remainingMinutes = absMinutes % (24 * 60)
+        val hours = remainingMinutes / 60
+        val mins = remainingMinutes % 60
+
+        // If it is URGENT, we want to show countdown only (no RUSH text)
+        if (stage == com.aliminder.app.domain.model.PersonaStage.URGENT) {
+             return String.format(Locale.US, "%02d:%02d", hours, mins)
+        }
+        
+        // If it is LATE, we want to show LATE only (no countdown)
+        if (stage == com.aliminder.app.domain.model.PersonaStage.LATE) {
+             return "LATE"
+        }
+
+        return if (minutes >= 0) {
+            // Future (Optimistic / Weary)
+            if (days > 0) {
+                String.format(Locale.US, "%d days\n%02d:%02d", days, hours, mins)
+            } else {
+                String.format(Locale.US, "%02d:%02d", hours, mins)
+            }
+        } else {
+             // Fallback for negative delta if not caught above (though Late usually catches this)
+             "LATE"
         }
     }
 }

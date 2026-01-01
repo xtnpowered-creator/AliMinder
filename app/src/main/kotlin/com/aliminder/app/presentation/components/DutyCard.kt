@@ -14,18 +14,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.aliminder.app.domain.model.Event
+import com.aliminder.app.domain.model.Duty
+import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.mock.MockData
+import java.time.Duration
+import java.time.LocalDateTime
+import java.util.Locale
+import kotlin.math.abs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Event card showing title, time, status ring, and expandable PoNR math.
+ * Duty card showing title, time, status ring, and expandable PoNR math.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun EventCard(
-    event: Event,
+fun DutyCard(
+    duty: Duty,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -61,35 +66,47 @@ fun EventCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Determine delta based on stage
+                val stage = duty.getPersonaStage()
+                // Always calculate delta relative to start/due time as requested for all stages
+                val deltaValue = Duration.between(LocalDateTime.now(), duty.startTime).toMinutes()
+
                 // Status ring
                 StatusRing(
-                    stage = event.getPersonaStage(),
-                    deltaText = MockData.formatDelta(event.delta.toLong()),
+                    stage = stage,
+                    deltaText = formatEventDelta(deltaValue, stage),
                     size = 60.dp,
                     strokeWidth = 5.dp
                 )
                 
-                // Event details
+                // Duty details
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = event.title,
+                        text = duty.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     
                     Spacer(modifier = Modifier.height(4.dp))
                     
+                    // Determine label: "Due" for tasks, "Start" for events
+                    val isTask = duty.category?.contains("Task", ignoreCase = true) == true
+                    val timeLabel = if (isTask) "Due" else "Start"
+
                     Text(
-                        text = "Starts: ${MockData.formatTime(event.startTime)}",
+                        text = "$timeLabel: ${MockData.formatTime(duty.startTime)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
-                    Text(
-                        text = "PoNR: ${event.ponr?.ponrTime?.let { MockData.formatTime(it) } ?: "N/A"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Only show PoNR time if not Urgent or Late
+                    if (stage != PersonaStage.URGENT && stage != PersonaStage.LATE) {
+                        Text(
+                            text = "PoNR: ${duty.ponr?.ponrTime?.let { MockData.formatTime(it) } ?: "N/A"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             
@@ -99,8 +116,43 @@ fun EventCard(
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
-                PoNRMathCard(event = event)
+                PoNRMathCard(duty = duty)
             }
         }
+    }
+}
+
+/**
+ * Formats the delta text based on the urgency stage.
+ * This logic is decoupled from MockData to ensure proper behavior in production.
+ */
+private fun formatEventDelta(minutes: Long, stage: PersonaStage): String {
+    val absMinutes = abs(minutes)
+    val days = absMinutes / (24 * 60)
+    val remainingMinutes = absMinutes % (24 * 60)
+    val hours = remainingMinutes / 60
+    val mins = remainingMinutes % 60
+
+    // Red Condition (LATE) -> Display "LATE" only
+    if (stage == PersonaStage.LATE) {
+        return "LATE"
+    }
+    
+    // Orange Condition (URGENT) -> Display countdown timer only
+    if (stage == PersonaStage.URGENT) {
+        return String.format(Locale.US, "%02d:%02d", hours, mins)
+    }
+
+    // Green/Yellow (Optimistic/Weary) -> Standard formatting
+    return if (minutes >= 0) {
+        if (days > 0) {
+            val dayLabel = if (days == 1L) "day" else "days"
+            String.format(Locale.US, "%d %s\n%02d:%02d", days, dayLabel, hours, mins)
+        } else {
+            String.format(Locale.US, "%02d:%02d", hours, mins)
+        }
+    } else {
+        // Fallback for negative numbers (should be caught by LATE, but just in case)
+        "LATE"
     }
 }

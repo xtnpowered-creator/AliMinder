@@ -13,9 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.theme.BorderDark
-import com.aliminder.app.presentation.theme.GraveRed
+import com.aliminder.app.presentation.theme.LateRed
 import com.aliminder.app.presentation.theme.TextSecondary
-import com.aliminder.app.presentation.theme.WearyOrange
+import com.aliminder.app.presentation.theme.UrgentOrange
+import com.aliminder.app.presentation.theme.WearyYellow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,8 +27,9 @@ fun AliMinderTopAppBar(
 ) {
     val topBarColor = if (useDynamicColor) {
         when (overallStage) {
-            PersonaStage.WEARY -> WearyOrange
-            PersonaStage.GRAVE -> GraveRed
+            PersonaStage.WEARY -> WearyYellow
+            PersonaStage.URGENT -> UrgentOrange
+            PersonaStage.LATE -> LateRed
             else -> MaterialTheme.colorScheme.background
         }
     } else {

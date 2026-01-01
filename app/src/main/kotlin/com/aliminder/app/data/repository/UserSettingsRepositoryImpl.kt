@@ -22,9 +22,13 @@ class UserSettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateDynamicTitleBarColor(enabled: Boolean) {
-        // Fix: No need to convert toEntity(), just handle the optional from DAO
         val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
         userSettingsDao.insert(currentSettings.copy(useDynamicTitleBarColor = enabled))
+    }
+
+    override suspend fun updateUrgencyTimeThreshold(minutes: Int) {
+        val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
+        userSettingsDao.insert(currentSettings.copy(urgencyTimeThreshold = minutes))
     }
 }
 
@@ -37,7 +41,8 @@ fun UserSettingsEntity.toDomainModel(): UserSettings {
         defaultBufferMinutes = defaultBufferMinutes,
         audioRespectsSilentMode = audioRespectsSilentMode,
         audioVoiceSelection = audioVoiceSelection,
-        useDynamicTitleBarColor = useDynamicTitleBarColor
+        useDynamicTitleBarColor = useDynamicTitleBarColor,
+        urgencyTimeThreshold = urgencyTimeThreshold
     )
 }
 
@@ -49,6 +54,7 @@ fun UserSettings.toEntity(): UserSettingsEntity {
         defaultBufferMinutes = defaultBufferMinutes,
         audioRespectsSilentMode = audioRespectsSilentMode,
         audioVoiceSelection = audioVoiceSelection,
-        useDynamicTitleBarColor = useDynamicTitleBarColor
+        useDynamicTitleBarColor = useDynamicTitleBarColor,
+        urgencyTimeThreshold = urgencyTimeThreshold
     )
 }

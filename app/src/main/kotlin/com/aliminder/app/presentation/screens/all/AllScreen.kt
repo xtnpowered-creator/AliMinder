@@ -11,19 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aliminder.app.domain.model.Event
-import com.aliminder.app.domain.model.EventProvider
+import com.aliminder.app.domain.model.Duty
+import com.aliminder.app.domain.model.DutyProvider
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.domain.model.PoNRCalculation
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
-import com.aliminder.app.presentation.components.EventCard
+import com.aliminder.app.presentation.components.DutyCard
 import com.aliminder.app.presentation.mock.MockData
 import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 import com.aliminder.app.presentation.theme.AliMinderTheme
 
 /**
  * ALL Screen - Unified Sentinel Dashboard
- * Shows all events sorted by PoNR proximity
+ * Shows all duties sorted by PoNR proximity
  */
 @Composable
 fun AllScreen(
@@ -31,12 +31,15 @@ fun AllScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // Observe state from ViewModel
-    val events by viewModel.events.collectAsState()
+    val duties by viewModel.duties.collectAsState()
     val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
+    // Filter out Pending invites from the main dashboard
+    val filteredDuties = duties.filter { it.category != "Pending" }
+
     AllScreenContent(
-        events = events,
+        duties = filteredDuties,
         overallStage = overallStage,
         useDynamicColor = userSettings.useDynamicTitleBarColor
     )
@@ -44,7 +47,7 @@ fun AllScreen(
 
 @Composable
 fun AllScreenContent(
-    events: List<Event>,
+    duties: List<Duty>,
     overallStage: PersonaStage,
     useDynamicColor: Boolean
 ) {
@@ -64,13 +67,13 @@ fun AllScreenContent(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Event list
-            items(events) { event ->
-                EventCard(event = event)
+            // Duty list
+            items(duties) { duty ->
+                DutyCard(duty = duty)
             }
 
             // Empty state (if list is empty)
-            if (events.isEmpty()) {
+            if (duties.isEmpty()) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -83,7 +86,7 @@ fun AllScreenContent(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "No events scheduled",
+                                text = "No duties scheduled",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -99,14 +102,14 @@ fun AllScreenContent(
 @Composable
 fun AllScreenPreview() {
     AliMinderTheme {
-        // Map MockData to Domain Event for Preview
-        val previewEvents = MockData.sampleEvents.map { mockEvent ->
-             Event(
+        // Map MockData to Domain Duty for Preview
+        val previewDuties = MockData.sampleEvents.map { mockEvent ->
+             Duty(
                 id = mockEvent.id,
                 title = mockEvent.title,
                 startTime = mockEvent.startTime,
                 endTime = mockEvent.startTime.plusHours(1),
-                provider = EventProvider.SHADOW,
+                provider = DutyProvider.SHADOW,
                 category = mockEvent.category,
                 delta = mockEvent.deltaMinutes.toInt(),
                 ponr = PoNRCalculation(
@@ -120,18 +123,18 @@ fun AllScreenPreview() {
                     personaStage = when(mockEvent.personaStage) {
                         com.aliminder.app.presentation.mock.PersonaStage.OPTIMISTIC -> PersonaStage.OPTIMISTIC
                         com.aliminder.app.presentation.mock.PersonaStage.WEARY -> PersonaStage.WEARY
-                        com.aliminder.app.presentation.mock.PersonaStage.GRAVE -> PersonaStage.GRAVE
+                        com.aliminder.app.presentation.mock.PersonaStage.GRAVE -> PersonaStage.URGENT // Updated
                     }
                 )
             )
         }.sortedBy { it.delta }
 
         // Determine stage for preview
-        val previewStage = previewEvents.firstOrNull()?.getPersonaStage() ?: PersonaStage.OPTIMISTIC
+        val previewStage = previewDuties.firstOrNull()?.getPersonaStage() ?: PersonaStage.OPTIMISTIC
 
         Surface(color = MaterialTheme.colorScheme.background) {
             AllScreenContent(
-                events = previewEvents,
+                duties = previewDuties,
                 overallStage = previewStage,
                 useDynamicColor = true
             )

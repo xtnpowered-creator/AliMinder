@@ -10,10 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aliminder.app.domain.model.Event
+import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
-import com.aliminder.app.presentation.components.EventCard
+import com.aliminder.app.presentation.components.DutyCard
 import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 
 /**
@@ -26,12 +26,14 @@ fun EventsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // Observe state from ViewModel
-    val events by viewModel.events.collectAsState()
+    val allDuties by viewModel.duties.collectAsState()
     val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
-    // Filter for Events (Anything NOT category "Task")
-    val filteredEvents = events.filter { it.category != "SHADOW_TASK" } // Updated category name
+    // Filter for Events: Not SHADOW_TASK AND Not Pending
+    val filteredEvents = allDuties.filter { 
+        it.category != "SHADOW_TASK" && it.category != "Pending" 
+    }
 
     EventsScreenContent(
         events = filteredEvents,
@@ -42,7 +44,7 @@ fun EventsScreen(
 
 @Composable
 fun EventsScreenContent(
-    events: List<Event>,
+    events: List<Duty>,
     overallStage: PersonaStage,
     useDynamicColor: Boolean
 ) {
@@ -64,7 +66,7 @@ fun EventsScreenContent(
         ) {
             // Event list
             items(events) { event ->
-                EventCard(event = event)
+                DutyCard(duty = event)
             }
 
             // Empty state (if list is empty)

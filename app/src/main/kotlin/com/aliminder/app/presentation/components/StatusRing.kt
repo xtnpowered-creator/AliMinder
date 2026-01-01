@@ -1,6 +1,5 @@
 package com.aliminder.app.presentation.components
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
@@ -18,10 +16,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aliminder.app.domain.model.PersonaStage
-import com.aliminder.app.presentation.theme.GraveRed
+import com.aliminder.app.presentation.theme.LateRed
 import com.aliminder.app.presentation.theme.OptimisticGreen
-import com.aliminder.app.presentation.theme.WearyOrange
+import com.aliminder.app.presentation.theme.UrgentOrange
+import com.aliminder.app.presentation.theme.WearyYellow
 
 /**
  * Squircular status ring indicator showing persona stage and delta.
@@ -36,11 +36,12 @@ fun StatusRing(
 ) {
     val ringColor = when (stage) {
         PersonaStage.OPTIMISTIC -> OptimisticGreen
-        PersonaStage.WEARY -> WearyOrange
-        PersonaStage.GRAVE -> GraveRed
+        PersonaStage.WEARY -> WearyYellow
+        PersonaStage.URGENT -> UrgentOrange
+        PersonaStage.LATE -> LateRed
     }
 
-    val finalWidth = size * 1.2f
+    val finalWidth = size * 1.32f // 10% wider than 1.2f (1.2 * 1.1)
     val finalHeight = size * 1.1f
     
     Box(
@@ -50,7 +51,7 @@ fun StatusRing(
         Canvas(modifier = Modifier.fillMaxSize()) {
             val strokeWidthPx = strokeWidth.toPx()
             
-            val width = size.toPx() * 1.2f - strokeWidthPx
+            val width = size.toPx() * 1.32f - strokeWidthPx
             val height = size.toPx() * 1.1f - strokeWidthPx
 
             val squircleFactor = 0.8f 
@@ -81,7 +82,7 @@ fun StatusRing(
         // The Text composable is centered by the Box and handles its own multi-line alignment
         Text(
             text = deltaText,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.2.sp), // Increased by 10% from 12.sp
             fontWeight = FontWeight.Bold,
             color = ringColor,
             textAlign = TextAlign.Center // Explicitly center multi-line text

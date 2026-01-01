@@ -10,10 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aliminder.app.domain.model.Event
+import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
-import com.aliminder.app.presentation.components.EventCard
+import com.aliminder.app.presentation.components.DutyCard
 import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 
 /**
@@ -26,15 +26,15 @@ fun PendingScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // Observe state from ViewModel
-    val events by viewModel.events.collectAsState()
+    val allDuties by viewModel.duties.collectAsState()
     val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
     // Filter for Pending items
-    val filteredEvents = events.filter { it.category == "Pending" }
+    val pendingDuties = allDuties.filter { it.category == "Pending" }
 
     PendingScreenContent(
-        events = filteredEvents,
+        pendingDuties = pendingDuties,
         overallStage = overallStage,
         useDynamicColor = userSettings.useDynamicTitleBarColor
     )
@@ -42,7 +42,7 @@ fun PendingScreen(
 
 @Composable
 fun PendingScreenContent(
-    events: List<Event>,
+    pendingDuties: List<Duty>,
     overallStage: PersonaStage,
     useDynamicColor: Boolean
 ) {
@@ -62,11 +62,11 @@ fun PendingScreenContent(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(events) { event ->
-                EventCard(event = event)
+            items(pendingDuties) { pendingDuty ->
+                DutyCard(duty = pendingDuty)
             }
 
-            if (events.isEmpty()) {
+            if (pendingDuties.isEmpty()) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),

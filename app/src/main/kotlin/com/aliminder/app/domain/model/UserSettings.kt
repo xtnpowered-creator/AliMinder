@@ -7,5 +7,6 @@ data class UserSettings(
     val defaultBufferMinutes: Int = 10,
     val audioRespectsSilentMode: Boolean = false,
     val audioVoiceSelection: String? = null,
-    val useDynamicTitleBarColor: Boolean = true // The new setting
+    val useDynamicTitleBarColor: Boolean = true,
+    val urgencyTimeThreshold: Int = 60
 )

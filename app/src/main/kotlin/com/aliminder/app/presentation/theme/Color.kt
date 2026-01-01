@@ -4,8 +4,13 @@ import androidx.compose.ui.graphics.Color
 
 // Persona stage colors (Status Rings)
 val OptimisticGreen = Color(0xFF4CAF50)
-val WearyOrange = Color(0xFFFF9800)
-val GraveRed = Color(0xFFF44336)
+val WearyYellow = Color(0xFFFFEB3B) // New Yellow for Weary
+val UrgentOrange = Color(0xFFFF9800) // Renamed from WearyOrange
+val LateRed = Color(0xFFF44336) // Renamed from GraveRed
+
+// Legacy aliases to prevent immediate breakages, marked for deprecation
+val WearyOrange = UrgentOrange 
+val GraveRed = LateRed
 
 // Primary brand colors
 val VinylPurple = Color(0xFF6200EE)

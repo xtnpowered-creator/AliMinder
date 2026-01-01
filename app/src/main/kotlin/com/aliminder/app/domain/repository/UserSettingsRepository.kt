@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface UserSettingsRepository {
     fun getUserSettings(): Flow<UserSettings>
     suspend fun updateDynamicTitleBarColor(enabled: Boolean)
+    suspend fun updateUrgencyTimeThreshold(minutes: Int) // New method
 }

@@ -3,9 +3,9 @@ package com.aliminder.app.domain.model
 import java.time.LocalDateTime
 
 /**
- * Provider source for calendar events.
+ * Provider source for duties (events and tasks).
  */
-enum class EventProvider {
+enum class DutyProvider {
     /** Microsoft 365 Graph API */
     MICROSOFT_365,
     
@@ -17,32 +17,32 @@ enum class EventProvider {
 }
 
 /**
- * Unified calendar event from any provider (M365, Google, or Shadow).
+ * Unified duty from any provider (M365, Google, or Shadow).
  * 
- * This domain model aggregates events from multiple sources into a single
+ * This domain model aggregates duties from multiple sources into a single
  * stream sorted by PoNR proximity for the "ALL" dashboard view.
  */
-data class Event(
+data class Duty(
     /** Unique identifier (provider-specific) */
     val id: String,
     
-    /** Event title */
+    /** Duty title */
     val title: String,
     
-    /** Event description */
+    /** Duty description */
     val description: String? = null,
     
-    /** Event start time */
+    /** Duty start time (or due time for tasks) */
     val startTime: LocalDateTime,
     
-    /** Event end time */
+    /** Duty end time */
     val endTime: LocalDateTime,
     
     /** Location/venue */
     val location: String? = null,
     
     /** Provider source */
-    val provider: EventProvider,
+    val provider: DutyProvider,
     
     /** Custom commute time (minutes) - overrides default */
     val customCommuteMinutes: Int? = null,
@@ -62,14 +62,14 @@ data class Event(
     /** Delta minutes (computed from PoNR) */
     val delta: Int = Int.MAX_VALUE,
     
-    /** Whether this is an all-day event */
+    /** Whether this is an all-day duty */
     val isAllDay: Boolean = false,
     
-    /** Whether event has been dismissed/snoozed */
+    /** Whether duty has been dismissed/snoozed */
     val isDismissed: Boolean = false
 ) {
     /**
-     * Returns the persona stage for this event based on current delta.
+     * Returns the persona stage for this duty based on current delta.
      */
     fun getPersonaStage(): PersonaStage {
         return ponr?.personaStage ?: PersonaStage.OPTIMISTIC

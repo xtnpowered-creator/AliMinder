@@ -134,6 +134,42 @@ fun AppTab(userSettings: UserSettings, viewModel: SettingsViewModel) {
                 onCheckedChange = { viewModel.updateDynamicTitleBarColor(it) }
             )
         }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Urgency Time Threshold Setting
+        Text("Urgency Time Threshold", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(
+            "Determines when duties switch from Optimistic (Green) to Weary (Yellow).",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val options = listOf(30, 60, 90)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            options.forEach { minutes ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { viewModel.updateUrgencyTimeThreshold(minutes) }
+                ) {
+                    RadioButton(
+                        selected = userSettings.urgencyTimeThreshold == minutes,
+                        onClick = { viewModel.updateUrgencyTimeThreshold(minutes) }
+                    )
+                    Text(
+                        text = "$minutes min",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -394,7 +430,7 @@ fun AudioTab(
             Button(onClick = { viewModel.triggerPersona(PersonaStage.WEARY) }, enabled = !isPlaying, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)) { Text("Weary") }
         }
         Button(
-            onClick = { viewModel.triggerPersona(PersonaStage.GRAVE) },
+            onClick = { viewModel.triggerPersona(PersonaStage.URGENT) }, // Updated to URGENT
             enabled = !isPlaying,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             modifier = Modifier.fillMaxWidth()

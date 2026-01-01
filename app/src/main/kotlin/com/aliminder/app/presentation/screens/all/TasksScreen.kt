@@ -10,10 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aliminder.app.domain.model.Event
+import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
-import com.aliminder.app.presentation.components.EventCard
+import com.aliminder.app.presentation.components.DutyCard
 import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 
 /**
@@ -26,15 +26,15 @@ fun TasksScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     // Observe state from ViewModel
-    val events by viewModel.events.collectAsState()
+    val allDuties by viewModel.duties.collectAsState()
     val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
     // Filter for Tasks (Only category "SHADOW_TASK")
-    val filteredEvents = events.filter { it.category == "SHADOW_TASK" } // Updated category name
+    val tasks = allDuties.filter { it.category == "SHADOW_TASK" } // Updated category name
 
     TasksScreenContent(
-        events = filteredEvents,
+        tasks = tasks,
         overallStage = overallStage,
         useDynamicColor = userSettings.useDynamicTitleBarColor
     )
@@ -42,7 +42,7 @@ fun TasksScreen(
 
 @Composable
 fun TasksScreenContent(
-    events: List<Event>,
+    tasks: List<Duty>,
     overallStage: PersonaStage,
     useDynamicColor: Boolean
 ) {
@@ -62,13 +62,13 @@ fun TasksScreenContent(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Event list
-            items(events) { event ->
-                EventCard(event = event)
+            // Task list
+            items(tasks) { task ->
+                DutyCard(duty = task)
             }
 
             // Empty state (if list is empty)
-            if (events.isEmpty()) {
+            if (tasks.isEmpty()) {
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),

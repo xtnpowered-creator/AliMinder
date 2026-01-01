@@ -28,4 +28,10 @@ class SettingsViewModel @Inject constructor(
             userSettingsRepository.updateDynamicTitleBarColor(enabled)
         }
     }
+
+    fun updateUrgencyTimeThreshold(minutes: Int) {
+        viewModelScope.launch {
+            userSettingsRepository.updateUrgencyTimeThreshold(minutes)
+        }
+    }
 }

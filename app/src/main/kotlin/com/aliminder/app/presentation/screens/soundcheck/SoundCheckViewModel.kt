@@ -54,7 +54,8 @@ class SoundCheckViewModel @Inject constructor(
         val stageName = when(stage) {
             PersonaStage.OPTIMISTIC -> "Optimistic"
             PersonaStage.WEARY -> "Weary"
-            PersonaStage.GRAVE -> "Grave"
+            PersonaStage.URGENT -> "Urgent" // Fixed GRAVE -> URGENT
+            PersonaStage.LATE -> "Late" // Added LATE
         }
         vinylEngine.playIntervention(stageName)
     }

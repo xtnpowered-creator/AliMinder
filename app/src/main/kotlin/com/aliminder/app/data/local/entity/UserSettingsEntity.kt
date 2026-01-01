@@ -12,5 +12,6 @@ data class UserSettingsEntity(
     val defaultBufferMinutes: Int = 10,
     val audioRespectsSilentMode: Boolean = false,
     val audioVoiceSelection: String? = null,
-    val useDynamicTitleBarColor: Boolean = true // Added new setting
+    val useDynamicTitleBarColor: Boolean = true,
+    val urgencyTimeThreshold: Int = 60 // New setting: 30, 60, or 90 minutes
 )
