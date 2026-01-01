@@ -25,20 +25,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aliminder.app.domain.model.PersonaStage
+import com.aliminder.app.domain.model.UserSettings
 import com.aliminder.app.presentation.screens.soundcheck.SoundCheckViewModel
 import com.aliminder.app.presentation.theme.BorderDark
 import com.aliminder.app.presentation.theme.TextSecondary
 import com.aliminder.app.presentation.theme.aliMinderTopAppBarColors
 import kotlinx.coroutines.delay
+import java.util.Locale
 
 /**
  * Settings Screen with Tabs
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen() {
-    val tabs = listOf("Accounts", "Filters", "PoNRs", "Audio", "About", "Power")
+fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+) {
+    val tabs = listOf("App", "Accounts", "Filters", "PoNRs", "Audio", "About", "Power")
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val userSettings by settingsViewModel.userSettings.collectAsState()
 
     Scaffold(
         topBar = {
@@ -95,13 +100,39 @@ fun SettingsScreen() {
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             when (selectedTabIndex) {
-                0 -> AccountsTab()
-                1 -> FiltersTab()
-                2 -> PoNRsTab()
-                3 -> AudioTab()
-                4 -> AboutTab()
-                5 -> PowerTab()
+                0 -> AppTab(userSettings, settingsViewModel)
+                1 -> AccountsTab()
+                2 -> FiltersTab()
+                3 -> PoNRsTab(userSettings)
+                4 -> AudioTab()
+                5 -> AboutTab()
+                6 -> PowerTab()
             }
+        }
+    }
+}
+
+@Composable
+fun AppTab(userSettings: UserSettings, viewModel: SettingsViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text("App Behavior", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Enable Dynamic Title Bar Color", style = MaterialTheme.typography.bodyLarge)
+            Switch(
+                checked = userSettings.useDynamicTitleBarColor,
+                onCheckedChange = { viewModel.updateDynamicTitleBarColor(it) }
+            )
         }
     }
 }
@@ -204,10 +235,10 @@ fun FiltersTab() {
 }
 
 @Composable
-fun PoNRsTab() {
-    var defaultCommute by remember { mutableIntStateOf(20) }
-    var defaultPrep by remember { mutableIntStateOf(15) }
-    var defaultBuffer by remember { mutableIntStateOf(10) }
+fun PoNRsTab(userSettings: UserSettings) {
+    var defaultCommute by remember { mutableIntStateOf(userSettings.defaultCommuteMinutes) }
+    var defaultPrep by remember { mutableIntStateOf(userSettings.defaultPrepMinutes) }
+    var defaultBuffer by remember { mutableIntStateOf(userSettings.defaultBufferMinutes) }
     
     Column(
         modifier = Modifier
@@ -301,7 +332,7 @@ fun AudioTab(
                                     }
                                 }
                             )
-                            Divider()
+                            HorizontalDivider() // Fixed: Divider -> HorizontalDivider
                         }
                     }
                 }
@@ -335,7 +366,7 @@ fun AudioTab(
                     fontWeight = FontWeight.Bold,
                     color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp)) // Fixed: Divider -> HorizontalDivider
                 Text("Last Action: $lastAction", style = MaterialTheme.typography.bodyMedium)
             }
         }
@@ -400,10 +431,9 @@ fun PowerTab() {
     var screenState by remember { mutableStateOf("On") }
     var chargingState by remember { mutableStateOf("Unplugged") }
 
-    // Receiver for screen and charging state
     val broadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
                 Intent.ACTION_SCREEN_ON -> screenState = "On"
                 Intent.ACTION_SCREEN_OFF -> screenState = "Off"
                 Intent.ACTION_POWER_CONNECTED -> chargingState = "Charging"
@@ -426,7 +456,6 @@ fun PowerTab() {
         }
     }
     
-    // Polling for battery stats
     LaunchedEffect(Unit) {
         val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -436,7 +465,7 @@ fun PowerTab() {
             batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
             val currentNowMicro = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
             currentDraw = currentNowMicro / 1000.0
-            delay(250) // Refresh 4x/sec
+            delay(250) 
         }
     }
 
@@ -461,7 +490,7 @@ fun PowerTab() {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("Current Draw", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        text = "${String.format("%.3f", currentDraw)} mA",
+                        text = "${String.format(Locale.US, "%.3f", currentDraw)} mA", // Fixed: Added Locale.US
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
                     )

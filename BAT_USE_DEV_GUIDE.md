@@ -7,7 +7,7 @@
 
 ---
 
-## SECTION 1: IMMEDIATE OPTIMIZATIONS (Phase 1)
+## SECTION 1: ALREADY IMPLEMENTED OPTIMIZATIONS (Phase 1)
 
 ### 1.1 Fix VinylStackEngine Scope Leak
 
