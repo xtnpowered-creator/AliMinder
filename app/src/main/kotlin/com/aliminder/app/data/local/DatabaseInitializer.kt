@@ -42,8 +42,7 @@ class DatabaseInitializer @Inject constructor(
                 provider = DutyProvider.SHADOW,
                 providerDutyId = "2",
                 sourceType = "SHADOW_EVENT",
-                acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 20
+                acceptanceStatus = "ACCEPTED"
             ),
             DutyEntity(
                 id = "3",
@@ -75,7 +74,6 @@ class DatabaseInitializer @Inject constructor(
                 providerDutyId = "10",
                 sourceType = "SHADOW_EVENT", // Personal
                 acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 15,
                 customPrepMinutes = 10,
                 customBufferMinutes = 5
             ),
@@ -88,7 +86,6 @@ class DatabaseInitializer @Inject constructor(
                 providerDutyId = "11",
                 sourceType = "SHADOW_EVENT", // Meeting
                 acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 0,
                 customPrepMinutes = 5
             ),
             DutyEntity(
@@ -121,7 +118,6 @@ class DatabaseInitializer @Inject constructor(
                 providerDutyId = "14",
                 sourceType = "SHADOW_EVENT", // Social
                 acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 25,
                 customPrepMinutes = 15,
                 customBufferMinutes = 10
             ),
@@ -177,7 +173,6 @@ class DatabaseInitializer @Inject constructor(
                 providerDutyId = "19",
                 sourceType = "SHADOW_EVENT", // Meeting
                 acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 30,
                 customPrepMinutes = 15,
                 customBufferMinutes = 10
             ),
@@ -212,7 +207,6 @@ class DatabaseInitializer @Inject constructor(
                 providerDutyId = "22",
                 sourceType = "SHADOW_EVENT", // Social
                 acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 15,
                 customPrepMinutes = 5,
                 customBufferMinutes = 5
             ),
@@ -224,8 +218,7 @@ class DatabaseInitializer @Inject constructor(
                 provider = DutyProvider.SHADOW,
                 providerDutyId = "23",
                 sourceType = "SHADOW_TASK", // Task
-                acceptanceStatus = "ACCEPTED",
-                customCommuteMinutes = 10
+                acceptanceStatus = "ACCEPTED"
             ),
             DutyEntity(
                 id = "24",

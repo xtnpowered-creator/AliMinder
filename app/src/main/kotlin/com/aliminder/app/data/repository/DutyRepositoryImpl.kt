@@ -7,6 +7,7 @@ import com.aliminder.app.data.mapper.toDomainDuty
 import com.aliminder.app.domain.model.DismissalReason
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.repository.DutyRepository
+import com.aliminder.app.domain.usecase.CalculatePoNRUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -19,7 +20,8 @@ import javax.inject.Singleton
 @Singleton
 class DutyRepositoryImpl @Inject constructor(
     private val dutyDao: DutyDao,
-    private val userSettingsDao: UserSettingsDao
+    private val userSettingsDao: UserSettingsDao,
+    private val calculatePoNR: CalculatePoNRUseCase
 ) : DutyRepository {
 
     override fun getAllDuties(): Flow<List<Duty>> {
@@ -36,19 +38,24 @@ class DutyRepositoryImpl @Inject constructor(
             }
         }
 
-        // Combine the duties flow (which updates on DB change), the user settings flow,
-        // and the ticker flow. This ensures the UI refreshes when:
-        // 1. The database is updated by the worker.
-        // 2. The user changes a relevant setting.
-        // 3. The ticker emits each minute for time-based calculations.
         return combine(
             dutyDao.getAllDuties(),
             userSettingsDao.getUserSettings(),
             ticker
         ) { duties, settings, _ ->
             val urgencyThreshold = settings?.urgencyTimeThreshold ?: 60
+            val defaultPrep = settings?.defaultPrepMinutes ?: 15
+            val defaultBuffer = settings?.defaultBufferMinutes ?: 10
+            
             duties.map { entity ->
-                entity.toDomainDuty(urgencyThresholdMinutes = urgencyThreshold)
+                val duty = entity.toDomainDuty()
+                val ponr = calculatePoNR(
+                    duty = duty,
+                    defaultPrepMinutes = defaultPrep,
+                    defaultBufferMinutes = defaultBuffer,
+                    urgencyThresholdMinutes = urgencyThreshold
+                )
+                duty.copy(ponr = ponr, delta = ponr.deltaMinutes)
             }
         }
     }

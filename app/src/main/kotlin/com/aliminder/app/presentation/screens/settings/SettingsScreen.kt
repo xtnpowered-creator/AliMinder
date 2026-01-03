@@ -76,7 +76,7 @@ import java.util.Locale
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val tabs = listOf("App", "Accounts", "Filters", "PoNRs", "Audio", "About", "Power", "Restore")
+    val tabs = listOf("App", "API Test", "Accounts", "Filters", "PoNRs", "Audio", "About", "Power", "Restore")
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
@@ -136,13 +136,14 @@ fun SettingsScreen(
         Box(modifier = Modifier.padding(padding)) {
             when (selectedTabIndex) {
                 0 -> AppTab(userSettings, settingsViewModel)
-                1 -> AccountsTab()
-                2 -> FiltersTab()
-                3 -> PoNRsTab(userSettings)
-                4 -> AudioTab()
-                5 -> AboutTab()
-                6 -> PowerTab()
-                7 -> RestoreScreen() // Reuse the composable we created
+                1 -> ApiTestScreen()
+                2 -> AccountsTab()
+                3 -> FiltersTab()
+                4 -> PoNRsTab(userSettings)
+                5 -> AudioTab()
+                6 -> AboutTab()
+                7 -> PowerTab()
+                8 -> RestoreScreen() // Reuse the composable we created
             }
         }
     }

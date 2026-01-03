@@ -22,6 +22,18 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        
+        // Load Google Maps API key from local.properties
+        val properties = org.jetbrains.kotlin.konan.properties.Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { properties.load(it) }
+        }
+        buildConfigField(
+            "String",
+            "GOOGLE_MAPS_API_KEY",
+            "\"${properties.getProperty("GOOGLE_MAPS_API_KEY", "")}\""
+        )
     }
 
     buildTypes {
@@ -48,6 +60,7 @@ android {
     
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     
     composeOptions {
@@ -179,6 +192,11 @@ dependencies {
     
     // Gson (JSON parsing)
     implementation("com.google.code.gson:gson:2.10.1")
+    
+    // OkHttp & Retrofit (HTTP Client for Google Maps API)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
