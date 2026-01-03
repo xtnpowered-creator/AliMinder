@@ -1,6 +1,5 @@
 package com.aliminder.app.data.local
 
-import android.content.Context
 import com.aliminder.app.data.local.dao.DutyDao
 import com.aliminder.app.data.local.dao.UserSettingsDao
 import com.aliminder.app.data.local.entity.DutyEntity

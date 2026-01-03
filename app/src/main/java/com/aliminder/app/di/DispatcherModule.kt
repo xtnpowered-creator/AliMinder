@@ -6,11 +6,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 import javax.inject.Qualifier
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.asCoroutineDispatcher
 
 /**
  * Hilt module providing custom coroutine dispatchers.

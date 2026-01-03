@@ -3,8 +3,8 @@ package com.aliminder.app.data.mapper
 import com.aliminder.app.data.local.entity.DutyEntity
 import com.aliminder.app.domain.model.DismissalReason
 import com.aliminder.app.domain.model.Duty
-import com.aliminder.app.domain.model.PoNRCalculation
 import com.aliminder.app.domain.model.PersonaStage
+import com.aliminder.app.domain.model.PoNRCalculation
 import java.time.Duration
 import java.time.LocalDateTime
 

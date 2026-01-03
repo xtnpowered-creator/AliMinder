@@ -2,7 +2,6 @@ package com.aliminder.app.data.audio
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
-import android.speech.tts.Voice
 import android.util.Log
 import com.aliminder.app.di.ApplicationScope
 import dagger.hilt.android.qualifiers.ApplicationContext

@@ -4,8 +4,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,7 +33,8 @@ fun AliMinderBottomBar(
         NavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(68.dp), // Reduced height by ~15%
+                .height(68.dp) // Reduced height by ~15%
+                .padding(horizontal = 4.dp), // Add padding to squeeze icons tighter
             containerColor = MaterialTheme.colorScheme.background,
             windowInsets = WindowInsets(0, 0, 0, 0)
         ) {
