@@ -41,7 +41,7 @@ import java.util.Locale
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val tabs = listOf("App", "Accounts", "Filters", "PoNRs", "Audio", "About", "Power")
+    val tabs = listOf("App", "Accounts", "Filters", "PoNRs", "Audio", "About", "Power", "Restore")
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
@@ -107,6 +107,7 @@ fun SettingsScreen(
                 4 -> AudioTab()
                 5 -> AboutTab()
                 6 -> PowerTab()
+                7 -> RestoreScreen() // Reuse the composable we created
             }
         }
     }
@@ -148,12 +149,12 @@ fun AppTab(userSettings: UserSettings, viewModel: SettingsViewModel) {
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        val options = listOf(30, 60, 90)
+        val urgencyOptions = listOf(30, 60, 90)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            options.forEach { minutes ->
+            urgencyOptions.forEach { minutes ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { viewModel.updateUrgencyTimeThreshold(minutes) }
@@ -164,6 +165,44 @@ fun AppTab(userSettings: UserSettings, viewModel: SettingsViewModel) {
                     )
                     Text(
                         text = "$minutes min",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Auto-Hide Overdue Setting
+        Text("Auto-Hide Overdue Duties", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(
+            "Duties overdue by this amount will be automatically hidden.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        val autoHideOptions = listOf(30, 60, 120, 180)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            autoHideOptions.forEach { minutes ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().clickable { viewModel.updateAutoHideOverdueMinutes(minutes) }
+                ) {
+                    RadioButton(
+                        selected = userSettings.autoHideOverdueMinutes == minutes,
+                        onClick = { viewModel.updateAutoHideOverdueMinutes(minutes) }
+                    )
+                    Text(
+                        text = when(minutes) {
+                            60 -> "1 hour"
+                            120 -> "2 hours (default)"
+                            180 -> "3 hours"
+                            else -> "$minutes minutes"
+                        },
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(start = 4.dp)
                     )

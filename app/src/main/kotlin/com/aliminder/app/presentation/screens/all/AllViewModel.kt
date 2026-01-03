@@ -3,6 +3,7 @@ package com.aliminder.app.presentation.screens.all
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aliminder.app.data.local.DatabaseInitializer
+import com.aliminder.app.domain.model.DismissalReason
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.domain.repository.DutyRepository
@@ -20,7 +21,9 @@ class AllViewModel @Inject constructor(
     private val databaseInitializer: DatabaseInitializer
 ) : ViewModel() {
 
+    // Main dashboard shows only non-dismissed duties
     val duties: StateFlow<List<Duty>> = dutyRepository.getAllDuties()
+        .map { allDuties -> allDuties.filter { !it.isDismissed } }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -41,6 +44,12 @@ class AllViewModel @Inject constructor(
         // Seed the database on first launch
         viewModelScope.launch {
             databaseInitializer.initialize()
+        }
+    }
+    
+    fun dismissDuty(duty: Duty, reason: DismissalReason) {
+        viewModelScope.launch {
+            dutyRepository.dismissDuty(duty.id, reason)
         }
     }
 }

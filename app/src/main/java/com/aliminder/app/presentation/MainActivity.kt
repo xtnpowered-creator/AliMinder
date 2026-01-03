@@ -9,6 +9,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.aliminder.app.domain.worker.AutoHideDutiesWorker
 import com.aliminder.app.presentation.navigation.AppNavigation
 import com.aliminder.app.presentation.theme.AliMinderTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +29,17 @@ class MainActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Lifecycle observer to trigger auto-hide check when app is started
+        val lifecycleObserver = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                val workManager = WorkManager.getInstance(applicationContext)
+                val oneTimeWorkRequest = OneTimeWorkRequestBuilder<AutoHideDutiesWorker>().build()
+                workManager.enqueue(oneTimeWorkRequest)
+            }
+        }
+
+        lifecycle.addObserver(lifecycleObserver)
         
         setContent {
             AliMinderTheme {

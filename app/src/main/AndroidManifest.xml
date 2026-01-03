@@ -30,6 +30,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AliMinder"
+        tools:node="merge"
         tools:targetApi="31">
 
         <!-- Main Activity (Compose) -->
@@ -58,6 +59,18 @@
                     android:scheme="com.aliminder.app" />
             </intent-filter>
         </activity>
+
+        <!-- Disable default WorkManager initializer using androidx.startup -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
     </application>
 

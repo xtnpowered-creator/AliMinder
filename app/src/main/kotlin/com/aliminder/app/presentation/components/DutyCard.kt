@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aliminder.app.domain.model.Duty
@@ -37,10 +38,16 @@ fun DutyCard(
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
     
+    // Define the shape explicitly to use for both Card and Clipping if needed
+    val cardShape = CardDefaults.shape
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .bringIntoViewRequester(bringIntoViewRequester)
+            // Clip the card content to its shape to prevent background bleed-through
+            // when placed on top of colored swipe backgrounds.
+            .clip(cardShape) 
             .clickable { 
                 expanded = !expanded 
                 if (expanded) {
@@ -55,7 +62,8 @@ fun DutyCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface // Explicitly set the background to SurfaceDark (black)
-        )
+        ),
+        shape = cardShape
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

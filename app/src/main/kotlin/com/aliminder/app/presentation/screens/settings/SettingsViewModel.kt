@@ -34,4 +34,10 @@ class SettingsViewModel @Inject constructor(
             userSettingsRepository.updateUrgencyTimeThreshold(minutes)
         }
     }
+
+    fun updateAutoHideOverdueMinutes(minutes: Int) {
+        viewModelScope.launch {
+            userSettingsRepository.updateAutoHideOverdueMinutes(minutes)
+        }
+    }
 }

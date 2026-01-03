@@ -1,5 +1,6 @@
 package com.aliminder.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.aliminder.app.domain.model.DutyProvider
@@ -21,5 +22,7 @@ data class DutyEntity(
     val customPrepMinutes: Int? = null,
     val customBufferMinutes: Int? = null,
     val isAllDay: Boolean = false,
-    val isDeleted: Boolean = false // For soft deletes
+    val isDeleted: Boolean = false, // For soft deletes (Legacy, maybe can be removed or kept for backward comp)
+    @ColumnInfo(name = "dismissal_reason")
+    val dismissalReason: String? = null // COMPLETED, CANCELLED, USER_HIDDEN, AUTO_HIDDEN
 )

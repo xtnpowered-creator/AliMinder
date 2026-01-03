@@ -64,10 +64,17 @@ data class Duty(
     
     /** Whether this is an all-day duty */
     val isAllDay: Boolean = false,
-    
-    /** Whether duty has been dismissed/snoozed */
-    val isDismissed: Boolean = false
+
+    /** Reason why the duty was dismissed/hidden */
+    val dismissalReason: DismissalReason? = null
 ) {
+    /**
+     * Whether duty has been dismissed/snoozed.
+     * Computed from dismissalReason.
+     */
+    val isDismissed: Boolean
+        get() = dismissalReason != null
+
     /**
      * Returns the persona stage for this duty based on current delta.
      */
