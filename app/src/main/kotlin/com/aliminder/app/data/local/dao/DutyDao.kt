@@ -35,4 +35,10 @@ interface DutyDao {
     // Accepts LocalDateTime for comparison
     @Query("UPDATE duties SET dismissal_reason = NULL WHERE dismissal_reason = 'AUTO_HIDDEN' AND startTime >= :newCutoffTime")
     suspend fun restoreNewlyValidDuties(newCutoffTime: LocalDateTime)
+
+    @Query("UPDATE duties SET location = :location WHERE id = :dutyId")
+    suspend fun updateLocation(dutyId: String, location: String)
+
+    @Query("UPDATE duties SET customCommuteMinutes = :commuteMinutes WHERE id = :dutyId")
+    suspend fun updateCustomCommute(dutyId: String, commuteMinutes: Int)
 }

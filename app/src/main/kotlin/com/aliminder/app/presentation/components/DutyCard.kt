@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -35,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
-import com.aliminder.app.domain.model.getAttentionReason
 import com.aliminder.app.domain.model.needsAttention
 import com.aliminder.app.presentation.mock.MockData
 import kotlinx.coroutines.delay
@@ -52,12 +53,15 @@ import kotlin.math.abs
 @Composable
 fun DutyCard(
     duty: Duty,
-    onSetCommute: (String, Int) -> Unit = { _, _ -> }, // dutyId, minutes - default no-op
-    onDismissAttention: (String) -> Unit = { }, // dutyId - default no-op
+    homeAddress: String? = null,
+    workAddress: String? = null,
+    onSetLocation: (String, String) -> Unit = { _, _ -> }, // dutyId, location
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var showCommuteDialog by remember { mutableStateOf(false) }
+    var showAddressEntry by remember { mutableStateOf(false) }
+    var addressEntryTitle by remember { mutableStateOf("Enter Location") }
+    var addressEntryContext by remember { mutableStateOf<String?>(null) }
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
     
@@ -86,7 +90,6 @@ fun DutyCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Main content row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -95,7 +98,6 @@ fun DutyCard(
                 val stage = duty.getPersonaStage()
                 val deltaValue = Duration.between(LocalDateTime.now(), duty.startTime).toMinutes()
 
-                // Status ring
                 StatusRing(
                     stage = stage,
                     deltaText = formatEventDelta(deltaValue, stage),
@@ -103,7 +105,6 @@ fun DutyCard(
                     strokeWidth = 5.dp
                 )
                 
-                // Duty details
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = duty.title,
@@ -121,66 +122,104 @@ fun DutyCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    
-                    if (stage != PersonaStage.URGENT && stage != PersonaStage.LATE) {
-                        Text(
-                            text = "PoNR: ${duty.ponr?.ponrTime?.let { MockData.formatTime(it) } ?: "N/A"}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
                 
                 // Warning icon if duty needs attention
                 if (duty.needsAttention()) {
                     Icon(
-                        imageVector = Icons.Outlined.Warning,
+                        imageVector = Icons.Outlined.Info,
                         contentDescription = "Needs attention",
-                        tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             }
             
-            // Expandable PoNR math
+            // Expandable section
             AnimatedVisibility(
                 visible = expanded,
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
                 Column {
+                    // Show location if set
+                    if (duty.location != null) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = duty.location,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                    
                     PoNRMathCard(duty = duty)
                     
-                    // Attention section if needed
-                    duty.getAttentionReason()?.let { reason ->
+                    // Attention section if duty needs attention
+                    if (duty.needsAttention()) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        AttentionSection(
-                            reason = reason,
-                            onSetCommute = { showCommuteDialog = true },
-                            onDismiss = { onDismissAttention(duty.id) }
-                        )
+                        AttentionSection {
+                            // Extract detected keyword from title
+                            val detectedKeyword = listOf("dinner", "lunch", "breakfast", "appointment", "meeting")
+                                .firstOrNull { duty.title.contains(it, ignoreCase = true) } ?: "location"
+                            
+                            LocationSuggestionCard(
+                                detectedKeyword = detectedKeyword,
+                                onSelectHome = {
+                                    if (!homeAddress.isNullOrBlank()) {
+                                        onSetLocation(duty.id, homeAddress)
+                                    } else {
+                                        addressEntryTitle = "Enter Home Address"
+                                        addressEntryContext = "For: ${duty.title}"
+                                        showAddressEntry = true
+                                    }
+                                },
+                                onSelectWork = {
+                                    if (!workAddress.isNullOrBlank()) {
+                                        onSetLocation(duty.id, workAddress)
+                                    } else {
+                                        addressEntryTitle = "Enter Work Address"
+                                        addressEntryContext = "For: ${duty.title}"
+                                        showAddressEntry = true
+                                    }
+                                },
+                                onSelectOther = {
+                                    addressEntryTitle = "Enter Location"
+                                    addressEntryContext = "For: ${duty.title}"
+                                    showAddressEntry = true
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
     
-    // Show commute dialog
-    if (showCommuteDialog) {
-        SetCommuteDialog(
-            dutyTitle = duty.title,
-            onDismiss = { showCommuteDialog = false },
-            onSave = { minutes ->
-                onSetCommute(duty.id, minutes)
-                showCommuteDialog = false
-            }
+    // Address entry dialog (only for Other or when Home/Work not set)
+    if (showAddressEntry) {
+        AddressEntryDialog(
+            title = addressEntryTitle,
+            contextText = addressEntryContext,
+            onSave = { address ->
+                onSetLocation(duty.id, address)
+                showAddressEntry = false
+            },
+            onDismiss = { showAddressEntry = false }
         )
     }
 }
 
-/**
- * Formats the delta text based on the urgency stage.
- */
 private fun formatEventDelta(minutes: Long, stage: PersonaStage): String {
     val absMinutes = abs(minutes)
     val days = absMinutes / (24 * 60)

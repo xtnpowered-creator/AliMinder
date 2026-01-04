@@ -76,8 +76,20 @@ fun Duty.getAttentionReason(): String? {
     if (!needsAttention()) return null
     
     return when {
-        location.isNullOrBlank() && title.mightContainLocation() ->
-            "This task mentions a location but doesn't have travel time set."
+        location.isNullOrBlank() && title.mightContainLocation() -> {
+            // Find which keyword triggered this
+            val detectedKeyword = listOf(
+                " at ", " @ ", "go to", "going to", "meet ", "meeting ",
+                "lunch", "dinner", "coffee", "breakfast",
+                "restaurant", "cafe", "bar", "appointment", "visit"
+            ).find { title.contains(it, ignoreCase = true) }?.trim()
+            
+            if (detectedKeyword != null) {
+                "This task mentions \"$detectedKeyword\" but doesn't have travel time set."
+            } else {
+                "This task might need travel time."
+            }
+        }
         else -> null
     }
 }

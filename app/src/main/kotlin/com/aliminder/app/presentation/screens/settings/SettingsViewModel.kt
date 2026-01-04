@@ -40,4 +40,16 @@ class SettingsViewModel @Inject constructor(
             userSettingsRepository.updateAutoHideOverdueMinutes(minutes)
         }
     }
+
+    fun updateHomeAddress(address: String) {
+        viewModelScope.launch {
+            userSettingsRepository.updateHomeAddress(address)
+        }
+    }
+
+    fun updateWorkAddress(address: String) {
+        viewModelScope.launch {
+            userSettingsRepository.updateWorkAddress(address)
+        }
+    }
 }

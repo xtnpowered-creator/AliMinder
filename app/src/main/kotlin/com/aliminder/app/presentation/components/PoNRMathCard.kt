@@ -24,7 +24,7 @@ import com.aliminder.app.presentation.theme.WearyYellow
 
 /**
  * Detailed breakdown of the PoNR calculation.
- * Formula: PoNR = StartTime - (Commute + Prep + Buffer)
+ * Formula: PoNR = StartTime - (Travel + Prep + Buffer)
  */
 @Composable
 fun PoNRMathCard(
@@ -51,14 +51,12 @@ fun PoNRMathCard(
         val timeLabel = if (isTask) "Due Time" else "Start Time"
         MathRow(timeLabel, MockData.formatTime(duty.startTime))
         
-        // Commute, Prep, Buffer logic
-        // Use effective values (defaults are hardcoded 20/15/10 for now if null)
-        // Ideally these defaults come from UserPreferences via ViewModel, but we'll hardcode for this display component
-        val commute = duty.getEffectiveCommuteMinutes(20)
-        val prep = duty.getEffectivePrepMinutes(15)
-        val buffer = duty.getEffectiveBufferMinutes(10)
+        // Travel, Prep, Buffer logic - use actual values from PoNR calculation
+        val travel = duty.ponr?.commuteMinutes ?: 0
+        val prep = duty.ponr?.prepMinutes ?: 15
+        val buffer = duty.ponr?.bufferMinutes ?: 10
         
-        MathRow("- Commute", "$commute min")
+        MathRow("- Travel", "$travel min")
         MathRow("- Prep", "$prep min")
         MathRow("- Buffer", "$buffer min")
         

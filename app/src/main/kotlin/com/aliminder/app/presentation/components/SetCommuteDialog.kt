@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /**
- * Dialog for setting custom commute time for a duty.
+ * Dialog for setting custom travel time for a duty.
  */
 @Composable
 fun SetCommuteDialog(
@@ -34,7 +34,7 @@ fun SetCommuteDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 
-            Text("Set Commute Time", fontWeight = FontWeight.Bold) 
+            Text("Set Travel Time", fontWeight = FontWeight.Bold) 
         },
         text = { 
             Column(modifier = Modifier.fillMaxWidth()) {

@@ -79,4 +79,12 @@ class DutyRepositoryImpl @Inject constructor(
         val newCutoffTime = LocalDateTime.now().minusMinutes(newOverdueMinutes.toLong())
         dutyDao.restoreNewlyValidDuties(newCutoffTime)
     }
+
+    override suspend fun updateDutyLocation(dutyId: String, location: String) {
+        dutyDao.updateLocation(dutyId, location.trim())
+    }
+
+    override suspend fun updateDutyCustomCommute(dutyId: String, commuteMinutes: Int) {
+        dutyDao.updateCustomCommute(dutyId, commuteMinutes)
+    }
 }

@@ -8,4 +8,6 @@ interface UserSettingsRepository {
     suspend fun updateDynamicTitleBarColor(enabled: Boolean)
     suspend fun updateUrgencyTimeThreshold(minutes: Int)
     suspend fun updateAutoHideOverdueMinutes(minutes: Int)
+    suspend fun updateHomeAddress(address: String)
+    suspend fun updateWorkAddress(address: String)
 }

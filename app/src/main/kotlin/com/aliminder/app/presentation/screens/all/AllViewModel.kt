@@ -52,4 +52,16 @@ class AllViewModel @Inject constructor(
             dutyRepository.dismissDuty(duty.id, reason)
         }
     }
+
+    fun updateDutyLocation(dutyId: String, location: String) {
+        viewModelScope.launch {
+            dutyRepository.updateDutyLocation(dutyId, location)
+        }
+    }
+
+    fun updateDutyCustomCommute(dutyId: String, commuteMinutes: Int) {
+        viewModelScope.launch {
+            dutyRepository.updateDutyCustomCommute(dutyId, commuteMinutes)
+        }
+    }
 }

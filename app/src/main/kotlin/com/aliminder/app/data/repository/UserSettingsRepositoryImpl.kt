@@ -59,33 +59,45 @@ class UserSettingsRepositoryImpl @Inject constructor(
         val oneTimeWorkRequest = OneTimeWorkRequestBuilder<AutoHideDutiesWorker>().build()
         workManager.enqueue(oneTimeWorkRequest)
     }
+
+    override suspend fun updateHomeAddress(address: String) {
+        val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
+        userSettingsDao.insert(currentSettings.copy(homeAddress = address.trim()))
+    }
+
+    override suspend fun updateWorkAddress(address: String) {
+        val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
+        userSettingsDao.insert(currentSettings.copy(workAddress = address.trim()))
+    }
 }
 
 // Mapper functions
 fun UserSettingsEntity.toDomainModel(): UserSettings {
     return UserSettings(
         isFirstLaunch = isFirstLaunch,
-        defaultCommuteMinutes = defaultCommuteMinutes,
         defaultPrepMinutes = defaultPrepMinutes,
         defaultBufferMinutes = defaultBufferMinutes,
         audioRespectsSilentMode = audioRespectsSilentMode,
         audioVoiceSelection = audioVoiceSelection,
         useDynamicTitleBarColor = useDynamicTitleBarColor,
         urgencyTimeThreshold = urgencyTimeThreshold,
-        autoHideOverdueMinutes = autoHideOverdueMinutes
+        autoHideOverdueMinutes = autoHideOverdueMinutes,
+        homeAddress = homeAddress,
+        workAddress = workAddress
     )
 }
 
 fun UserSettings.toEntity(): UserSettingsEntity {
     return UserSettingsEntity(
         isFirstLaunch = isFirstLaunch,
-        defaultCommuteMinutes = defaultCommuteMinutes,
         defaultPrepMinutes = defaultPrepMinutes,
         defaultBufferMinutes = defaultBufferMinutes,
         audioRespectsSilentMode = audioRespectsSilentMode,
         audioVoiceSelection = audioVoiceSelection,
         useDynamicTitleBarColor = useDynamicTitleBarColor,
         urgencyTimeThreshold = urgencyTimeThreshold,
-        autoHideOverdueMinutes = autoHideOverdueMinutes
+        autoHideOverdueMinutes = autoHideOverdueMinutes,
+        homeAddress = homeAddress,
+        workAddress = workAddress
     )
 }

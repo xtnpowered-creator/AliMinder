@@ -139,7 +139,7 @@ fun SettingsScreen(
                 1 -> ApiTestScreen()
                 2 -> AccountsTab()
                 3 -> FiltersTab()
-                4 -> PoNRsTab(userSettings)
+                4 -> PoNRsTab(userSettings, settingsViewModel)
                 5 -> AudioTab()
                 6 -> AboutTab()
                 7 -> PowerTab()
@@ -347,7 +347,6 @@ fun FiltersTab() {
 
 @Composable
 fun PoNRsTab(userSettings: UserSettings) {
-    var defaultCommute by remember { mutableIntStateOf(userSettings.defaultCommuteMinutes) }
     var defaultPrep by remember { mutableIntStateOf(userSettings.defaultPrepMinutes) }
     var defaultBuffer by remember { mutableIntStateOf(userSettings.defaultBufferMinutes) }
     
@@ -358,22 +357,14 @@ fun PoNRsTab(userSettings: UserSettings) {
             .verticalScroll(rememberScrollState())
     ) {
         Text("Default Parameters", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Default Commute", style = MaterialTheme.typography.bodyLarge)
-            Text(text = "$defaultCommute min", style = MaterialTheme.typography.titleMedium)
-        }
-        Slider(
-            value = defaultCommute.toFloat(),
-            onValueChange = { defaultCommute = it.toInt() },
-            valueRange = 0f..60f,
-            steps = 11
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            "Travel time is calculated automatically via Google Maps or set per-duty.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(16.dp))
+
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -382,7 +373,7 @@ fun PoNRsTab(userSettings: UserSettings) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Default Grooming", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Default Prep Time", style = MaterialTheme.typography.bodyLarge)
             Text(text = "$defaultPrep min", style = MaterialTheme.typography.titleMedium)
         }
         Slider(
