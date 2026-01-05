@@ -26,13 +26,16 @@ class CalculatePoNRUseCase @Inject constructor(
      */
     suspend operator fun invoke(
         duty: Duty,
+        currentLocation: android.location.Location?,
+        userHomeAddress: Address?,
+        userWorkAddress: Address?,
         defaultPrepMinutes: Int,
         defaultBufferMinutes: Int,
         urgencyThresholdMinutes: Int
     ): PoNRCalculation {
         
         // 1. Calculate travel time
-        val commuteMinutes = calculateCommuteTime(duty)
+        val commuteMinutes = calculateCommuteTime(duty, currentLocation, userHomeAddress, userWorkAddress)
         
         // 2. Get prep and buffer (custom or default)
         val prepMinutes = duty.customPrepMinutes ?: defaultPrepMinutes
@@ -74,39 +77,57 @@ class CalculatePoNRUseCase @Inject constructor(
      * Calculate commute time with smart fallback logic.
      * 
      * Priority:
-     * 1. Google Maps API (if physical location exists)
-     * 2. Custom override (if user set it)
-     * 3. Zero (default)
+     * 1. Custom override (if user set it)
+     * 2. Google Maps API with current GPS location as origin
+     * 3. Zero (if no destination or API fails)
      */
-    private suspend fun calculateCommuteTime(duty: Duty): Int {
-        // Custom override always wins
-        if (duty.customCommuteMinutes != null) {
-            Log.d(TAG, "Using custom commute: ${duty.customCommuteMinutes} min")
-            return duty.customCommuteMinutes
-        }
-        
-        // Check if physical travel is required
-        if (!duty.requiresPhysicalTravel()) {
-            Log.d(TAG, "No physical travel required (virtual/all-day/no location)")
+    private suspend fun calculateCommuteTime(
+        duty: Duty,
+        currentLocation: android.location.Location?,
+        userHomeAddress: Address?,
+        userWorkAddress: Address?
+    ): Int {
+        // No physical location = no commute needed
+        if (duty.location.isNullOrBlank()) {
             return 0
         }
-        
-        // Try to calculate from API
-        val apiResult = travelTimeService.calculateTravelTime(
-            destination = duty.location!!,
-            origin = "current location placeholder" // TODO: Get from user's home/work location
-        )
-        
-        if (apiResult != null) {
-            Log.d(TAG, "Using API-calculated travel time: $apiResult min")
-            return apiResult
+
+        // Check if custom commute time is set
+        if (duty.customCommuteMinutes != null && duty.customCommuteMinutes > 0) {
+            return duty.customCommuteMinutes
         }
-        
-        // API failed - default to zero
-        Log.d(TAG, "API failed, defaulting to 0 minutes (no travel time)")
-        return 0
+
+        // If no current GPS location available, return 0
+        if (currentLocation == null) {
+            return 0
+        }
+
+        // Call Google Maps API with current lat/lng and bearing
+        return try {
+            val origin = "${currentLocation.latitude},${currentLocation.longitude}"
+            val bearing = if (currentLocation.hasBearing()) {
+                currentLocation.bearing.toDouble()
+            } else {
+                null
+            }
+            
+            val apiResult = travelTimeService.calculateTravelTime(
+                destination = duty.location,
+                origin = origin,
+                heading = bearing
+            )
+            
+            if (apiResult != null && apiResult > 0) {
+                Log.d(TAG, "Using API-calculated travel time: $apiResult min from GPS (${currentLocation.latitude},${currentLocation.longitude}) with bearing ${bearing ?: "none"} to ${duty.location}")
+                apiResult
+            } else {
+                0
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error calculating travel time from current location", e)
+            0
+        }
     }
-    
     /**
      * Determine persona stage based on delta and start time.
      */

@@ -3,6 +3,7 @@ package com.aliminder.app.presentation.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,7 @@ fun AttentionSection(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(max = 200.dp)
+            .fillMaxWidth()
             .border(
                 BorderStroke(
                     width = 1.dp,

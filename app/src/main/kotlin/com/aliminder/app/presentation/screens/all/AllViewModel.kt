@@ -64,4 +64,16 @@ class AllViewModel @Inject constructor(
             dutyRepository.updateDutyCustomCommute(dutyId, commuteMinutes)
         }
     }
+    
+    fun acceptDuty(dutyId: String) {
+        viewModelScope.launch {
+            dutyRepository.acceptDuty(dutyId)
+        }
+    }
+    
+    fun denyDuty(dutyId: String) {
+        viewModelScope.launch {
+            dutyRepository.denyDuty(dutyId)
+        }
+    }
 }

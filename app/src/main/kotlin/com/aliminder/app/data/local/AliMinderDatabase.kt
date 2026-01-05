@@ -10,7 +10,7 @@ import com.aliminder.app.data.local.entity.UserSettingsEntity
 
 @Database(
     entities = [DutyEntity::class, UserSettingsEntity::class],
-    version = 3, // Incremented for homeAddress/workAddress
+    version = 4, // Incremented for structured address fields
     exportSchema = false
 )
 @TypeConverters(Converters::class)

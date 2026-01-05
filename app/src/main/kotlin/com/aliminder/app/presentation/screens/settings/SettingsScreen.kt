@@ -21,6 +21,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -346,9 +350,20 @@ fun FiltersTab() {
 }
 
 @Composable
-fun PoNRsTab(userSettings: UserSettings) {
+fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltViewModel()) {
     var defaultPrep by remember { mutableIntStateOf(userSettings.defaultPrepMinutes) }
     var defaultBuffer by remember { mutableIntStateOf(userSettings.defaultBufferMinutes) }
+    
+    // Address fields
+    var homeStreet by remember { mutableStateOf(userSettings.homeAddress?.street ?: "") }
+    var homeCity by remember { mutableStateOf(userSettings.homeAddress?.city ?: "") }
+    var homeState by remember { mutableStateOf(userSettings.homeAddress?.state ?: "") }
+    var homeZip by remember { mutableStateOf(userSettings.homeAddress?.zipCode ?: "") }
+    
+    var workStreet by remember { mutableStateOf(userSettings.workAddress?.street ?: "") }
+    var workCity by remember { mutableStateOf(userSettings.workAddress?.city ?: "") }
+    var workState by remember { mutableStateOf(userSettings.workAddress?.state ?: "") }
+    var workZip by remember { mutableStateOf(userSettings.workAddress?.zipCode ?: "") }
     
     Column(
         modifier = Modifier
@@ -356,6 +371,125 @@ fun PoNRsTab(userSettings: UserSettings) {
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        Text("Addresses", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            "Used for geofencing and smart commute detection. Leave blank if not needed.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Home Address
+        Text("Home Address", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = homeStreet,
+            onValueChange = { homeStreet = it },
+            label = { Text("Street") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = homeCity,
+                onValueChange = { homeCity = it },
+                label = { Text("City") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = homeState,
+                onValueChange = { homeState = it },
+                label = { Text("State") },
+                modifier = Modifier.weight(0.5f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = homeZip,
+            onValueChange = { homeZip = it },
+            label = { Text("ZIP Code") },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                viewModel.setHomeAddress(
+                    com.aliminder.app.domain.model.Address(
+                        street = homeStreet.takeIf { it.isNotBlank() } ?: "",
+                        city = homeCity.takeIf { it.isNotBlank() } ?: "",
+                        state = homeState.takeIf { it.isNotBlank() } ?: "",
+                        zipCode = homeZip.takeIf { it.isNotBlank() } ?: ""
+                    )
+                )
+            },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Save Home Address")
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Work Address
+        Text("Work Address", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = workStreet,
+            onValueChange = { workStreet = it },
+            label = { Text("Street") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = workCity,
+                onValueChange = { workCity = it },
+                label = { Text("City") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = workState,
+                onValueChange = { workState = it },
+                label = { Text("State") },
+                modifier = Modifier.weight(0.5f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = workZip,
+            onValueChange = { workZip = it },
+            label = { Text("ZIP Code") },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                viewModel.setWorkAddress(
+                    com.aliminder.app.domain.model.Address(
+                        street = workStreet.takeIf { it.isNotBlank() } ?: "",
+                        city = workCity.takeIf { it.isNotBlank() } ?: "",
+                        state = workState.takeIf { it.isNotBlank() } ?: "",
+                        zipCode = workZip.takeIf { it.isNotBlank() } ?: ""
+                    )
+                )
+            },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Save Work Address")
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(24.dp))
+        
         Text("Default Parameters", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Text(

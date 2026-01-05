@@ -54,11 +54,22 @@ fun String.mightContainLocation(): Boolean {
 /**
  * Check if duty needs user attention/action.
  * Returns true if:
- * 1. Title suggests location but no location field AND no custom commute set
- * 2. Has physical location but no custom commute (future: suggest API calculation)
+ * 1. Pending acceptance status
+ * 2. Event without location (always needs address for PoNR)
+ * 3. Task title suggests location but no location field AND no custom commute set
  */
 fun Duty.needsAttention(): Boolean {
-    // Title mentions location keywords but has no location field or custom commute
+    // Pending acceptance status needs user action
+    if (category == "Pending") {
+        return true
+    }
+    
+    // Events without location always need attention (for accurate PoNR)
+    if (category == "Event" && location.isNullOrBlank()) {
+        return true
+    }
+    
+    // Tasks: only if title mentions location keywords but has no location field or custom commute
     if (location.isNullOrBlank() && 
         title.mightContainLocation() && 
         customCommuteMinutes == null) {

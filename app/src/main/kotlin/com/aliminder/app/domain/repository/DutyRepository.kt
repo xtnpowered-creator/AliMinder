@@ -12,4 +12,6 @@ interface DutyRepository {
     suspend fun restoreNewlyValidDuties(newOverdueMinutes: Int)
     suspend fun updateDutyLocation(dutyId: String, location: String)
     suspend fun updateDutyCustomCommute(dutyId: String, commuteMinutes: Int)
+    suspend fun acceptDuty(dutyId: String)
+    suspend fun denyDuty(dutyId: String)
 }

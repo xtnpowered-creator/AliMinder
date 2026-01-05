@@ -41,4 +41,10 @@ interface DutyDao {
 
     @Query("UPDATE duties SET customCommuteMinutes = :commuteMinutes WHERE id = :dutyId")
     suspend fun updateCustomCommute(dutyId: String, commuteMinutes: Int)
+    
+    @Query("UPDATE duties SET acceptanceStatus = 'ACCEPTED' WHERE id = :dutyId")
+    suspend fun acceptDuty(dutyId: String)
+    
+    @Query("UPDATE duties SET dismissal_reason = 'USER_HIDDEN' WHERE id = :dutyId")
+    suspend fun denyDuty(dutyId: String)
 }

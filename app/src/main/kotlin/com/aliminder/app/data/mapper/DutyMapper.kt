@@ -10,10 +10,11 @@ import com.aliminder.app.domain.model.Duty
  */
 fun DutyEntity.toDomainDuty(): Duty {
     // Determine Category based on acceptance status first
-    val category = if (acceptanceStatus == "PENDING") {
-        "Pending"
-    } else {
-        sourceType // Fallback to sourceType (e.g., SHADOW_TASK, SHADOW_EVENT)
+    val category = when {
+        acceptanceStatus == "PENDING" -> "Pending"
+        sourceType.contains("EVENT", ignoreCase = true) -> "Event"
+        sourceType.contains("TASK", ignoreCase = true) -> "Task"
+        else -> sourceType // Fallback to raw sourceType
     }
 
     return Duty(

@@ -1,9 +1,5 @@
 package com.aliminder.app.presentation.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,23 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,184 +26,78 @@ import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.domain.model.needsAttention
 import com.aliminder.app.presentation.mock.MockData
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.Locale
 import kotlin.math.abs
 
 /**
- * Duty card showing title, time, status ring, and expandable PoNR math.
+ * Simplified duty card - click opens fullscreen modal.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DutyCard(
     duty: Duty,
-    homeAddress: String? = null,
-    workAddress: String? = null,
-    onSetLocation: (String, String) -> Unit = { _, _ -> }, // dutyId, location
+    onCardClick: (Duty) -> Unit = { },
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var showAddressEntry by remember { mutableStateOf(false) }
-    var addressEntryTitle by remember { mutableStateOf("Enter Location") }
-    var addressEntryContext by remember { mutableStateOf<String?>(null) }
-    val bringIntoViewRequester = remember { BringIntoViewRequester() }
-    val coroutineScope = rememberCoroutineScope()
-    
     val cardShape = CardDefaults.shape
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .bringIntoViewRequester(bringIntoViewRequester)
             .clip(cardShape) 
-            .clickable { 
-                expanded = !expanded 
-                if (expanded) {
-                    coroutineScope.launch {
-                        delay(300) 
-                        bringIntoViewRequester.bringIntoView()
-                    }
-                }
-            },
+            .clickable { onCardClick(duty) },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         shape = cardShape
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                val stage = duty.getPersonaStage()
-                val deltaValue = Duration.between(LocalDateTime.now(), duty.startTime).toMinutes()
+            val stage = duty.getPersonaStage()
+            val deltaValue = Duration.between(LocalDateTime.now(), duty.startTime).toMinutes()
 
-                StatusRing(
-                    stage = stage,
-                    deltaText = formatEventDelta(deltaValue, stage),
-                    size = 60.dp,
-                    strokeWidth = 5.dp
+            StatusRing(
+                stage = stage,
+                deltaText = formatEventDelta(deltaValue, stage),
+                size = 60.dp,
+                strokeWidth = 5.dp
+            )
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = duty.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
                 
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = duty.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
-                    val isTask = duty.category?.contains("Task", ignoreCase = true) == true
-                    val timeLabel = if (isTask) "Due" else "Start"
-
-                    Text(
-                        text = "$timeLabel: ${MockData.formatTime(duty.startTime)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Spacer(modifier = Modifier.height(4.dp))
                 
-                // Warning icon if duty needs attention
-                if (duty.needsAttention()) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = "Needs attention",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                val isTask = duty.category?.contains("Task", ignoreCase = true) == true
+                val timeLabel = if (isTask) "Due" else "Start"
+
+                Text(
+                    text = "$timeLabel: ${MockData.formatTime(duty.startTime)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             
-            // Expandable section
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Column {
-                    // Show location if set
-                    if (duty.location != null) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.LocationOn,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = duty.location,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                    
-                    PoNRMathCard(duty = duty)
-                    
-                    // Attention section if duty needs attention
-                    if (duty.needsAttention()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        AttentionSection {
-                            // Extract detected keyword from title
-                            val detectedKeyword = listOf("dinner", "lunch", "breakfast", "appointment", "meeting")
-                                .firstOrNull { duty.title.contains(it, ignoreCase = true) } ?: "location"
-                            
-                            LocationSuggestionCard(
-                                detectedKeyword = detectedKeyword,
-                                onSelectHome = {
-                                    if (!homeAddress.isNullOrBlank()) {
-                                        onSetLocation(duty.id, homeAddress)
-                                    } else {
-                                        addressEntryTitle = "Enter Home Address"
-                                        addressEntryContext = "For: ${duty.title}"
-                                        showAddressEntry = true
-                                    }
-                                },
-                                onSelectWork = {
-                                    if (!workAddress.isNullOrBlank()) {
-                                        onSetLocation(duty.id, workAddress)
-                                    } else {
-                                        addressEntryTitle = "Enter Work Address"
-                                        addressEntryContext = "For: ${duty.title}"
-                                        showAddressEntry = true
-                                    }
-                                },
-                                onSelectOther = {
-                                    addressEntryTitle = "Enter Location"
-                                    addressEntryContext = "For: ${duty.title}"
-                                    showAddressEntry = true
-                                }
-                            )
-                        }
-                    }
-                }
+            // Warning icon if duty needs attention
+            if (duty.needsAttention()) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = "Needs attention",
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
-    }
-    
-    // Address entry dialog (only for Other or when Home/Work not set)
-    if (showAddressEntry) {
-        AddressEntryDialog(
-            title = addressEntryTitle,
-            contextText = addressEntryContext,
-            onSave = { address ->
-                onSetLocation(duty.id, address)
-                showAddressEntry = false
-            },
-            onDismiss = { showAddressEntry = false }
-        )
     }
 }
 

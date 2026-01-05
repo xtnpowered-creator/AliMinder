@@ -9,6 +9,17 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- For TTS audio engine -->
     
+    <!-- Location Permissions for Travel Time Calculations -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Android 10+ for background tracking -->
+    
+    <!-- Activity Recognition for intelligent location tracking -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" /> <!-- Android 10+ -->
+    
+    <!-- Foreground Service for background location tracking -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" /> <!-- Android 14+ -->
+    
     <!-- Retained for Upcoming Phases -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
@@ -32,6 +43,17 @@
         android:theme="@style/Theme.AliMinder"
         tools:node="merge"
         tools:targetApi="31">
+
+        <!-- Geofence BroadcastReceiver -->
+        <receiver
+            android:name=".domain.service.GeofenceBroadcastReceiver"
+            android:exported="false" />
+
+        <!-- Location Tracking Foreground Service -->
+        <service
+            android:name=".presentation.service.LocationTrackingService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
 
         <!-- Main Activity (Compose) -->
         <activity

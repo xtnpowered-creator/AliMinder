@@ -41,15 +41,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateHomeAddress(address: String) {
+    fun setHomeAddress(address: com.aliminder.app.domain.model.Address) {
         viewModelScope.launch {
-            userSettingsRepository.updateHomeAddress(address)
+            userSettingsRepository.setHomeAddress(address)
         }
     }
 
-    fun updateWorkAddress(address: String) {
+    fun setWorkAddress(address: com.aliminder.app.domain.model.Address) {
         viewModelScope.launch {
-            userSettingsRepository.updateWorkAddress(address)
+            userSettingsRepository.setWorkAddress(address)
         }
     }
 }

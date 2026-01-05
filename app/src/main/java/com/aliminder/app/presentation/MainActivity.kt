@@ -6,12 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.aliminder.app.domain.worker.AutoHideDutiesWorker
+import com.aliminder.app.presentation.components.LocationPermissionsManager
 import com.aliminder.app.presentation.navigation.AppNavigation
 import com.aliminder.app.presentation.theme.AliMinderTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,14 +42,38 @@ class MainActivity : ComponentActivity() {
         lifecycle.addObserver(lifecycleObserver)
         
         setContent {
+            var showPermissionRequest by remember { 
+                mutableStateOf(!hasLocationPermissions())
+            }
+            
             AliMinderTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    if (showPermissionRequest) {
+                        LocationPermissionsManager(
+                            onAllPermissionsGranted = {
+                                showPermissionRequest = false
+                            },
+                            onPermissionsDenied = {
+                                // User can still use app without location features
+                                showPermissionRequest = false
+                            }
+                        )
+                    }
+                    
                     AppNavigation()
                 }
             }
         }
+    }
+    
+    /**
+     * Check if basic location permissions are granted.
+     */
+    private fun hasLocationPermissions(): Boolean {
+        return checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
     }
 }

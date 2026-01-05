@@ -26,13 +26,13 @@ class GoogleMapsTravelTimeService @Inject constructor() {
      * 
      * @param destination Destination address or place name
      * @param origin Origin address (default: current location placeholder)
-     * @param departureTime Departure time as Unix timestamp (seconds)
+     * @param heading Optional bearing/heading in degrees (0-360) to prevent wrong-side-of-road errors
      * @return Travel time in minutes, or null if API call fails
      */
     suspend fun calculateTravelTime(
         destination: String,
-        origin: String = "current+location",  // Placeholder for now
-        departureTime: Long? = null
+        origin: String = "current+location",
+        heading: Double? = null
     ): Int? {
         return try {
             // Log API key (first/last 4 chars only for security)
@@ -43,7 +43,7 @@ class GoogleMapsTravelTimeService @Inject constructor() {
                 "INVALID_OR_EMPTY"
             }
             Log.d(TAG, "API Key loaded: $keyPreview")
-            Log.d(TAG, "Calling API: origin='$origin', destination='$destination'")
+            Log.d(TAG, "Calling API: origin='$origin', destination='$destination', heading=${heading ?: "none"}")
             
             val response = api.getDistanceMatrix(
                 origins = origin,

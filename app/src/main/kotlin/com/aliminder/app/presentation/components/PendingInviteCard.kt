@@ -21,20 +21,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * Location suggestion card with inline Home/Work/Other buttons.
- * No popup needed for Home/Work if addresses are set.
+ * Attention card for pending duty invites/assignments.
+ * Shows Accept/Deny buttons.
  */
 @Composable
-fun LocationSuggestionCard(
-    onSelectHome: () -> Unit,
-    onSelectWork: () -> Unit,
-    onSelectOther: () -> Unit,
+fun PendingInviteCard(
+    onAccept: () -> Unit,
+    onDeny: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A1A) // Black background like duty cards
+            containerColor = Color(0xFF1A1A1A) // Black background matching LocationSuggestionCard
         ),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -42,46 +41,36 @@ fun LocationSuggestionCard(
             modifier = Modifier.padding(12.dp)
         ) {
             Text(
-                text = "No location. Add one?",
+                text = "Invited/Assigned to this duty.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White
             )
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Three buttons inline with minimal padding
+            // Accept and Deny buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedButton(
-                    onClick = onSelectHome,
+                    onClick = onAccept,
                     modifier = Modifier.weight(1f),
-                    border = BorderStroke(1.dp, Color.White),
+                    border = BorderStroke(1.dp, Color(0xFF4CAF50)), // Green border
                     shape = RoundedCornerShape(6.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    Text("Home", color = Color.White)
+                    Text("Accept", color = Color(0xFF4CAF50))
                 }
                 
                 OutlinedButton(
-                    onClick = onSelectWork,
+                    onClick = onDeny,
                     modifier = Modifier.weight(1f),
-                    border = BorderStroke(1.dp, Color.White),
+                    border = BorderStroke(1.dp, Color(0xFFF44336)), // Red border
                     shape = RoundedCornerShape(6.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    Text("Work", color = Color.White)
-                }
-                
-                OutlinedButton(
-                    onClick = onSelectOther,
-                    modifier = Modifier.weight(1f),
-                    border = BorderStroke(1.dp, Color.White),
-                    shape = RoundedCornerShape(6.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text("Other", color = Color.White)
+                    Text("Deny", color = Color(0xFFF44336))
                 }
             }
         }

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.presentation.components.DutyCard
+import com.aliminder.app.presentation.components.DutyDetailModal
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +41,7 @@ fun RestoreScreen(
 ) {
     val dismissedDuties by viewModel.dismissedDuties.collectAsState()
     var dutyToRestore by remember { mutableStateOf<Duty?>(null) }
+    var selectedDuty by remember { mutableStateOf<Duty?>(null) }
 
     // Show confirmation dialog when a duty is selected for restoration
     if (dutyToRestore != null) {
@@ -61,7 +63,8 @@ fun RestoreScreen(
         items(dismissedDuties, key = { it.id }) { duty ->
             SwipeToRestoreDutyCard(
                 duty = duty,
-                onRestore = { dutyToRestore = duty } // Trigger the dialog
+                onRestore = { dutyToRestore = duty }, // Trigger the dialog
+                onCardClick = { selectedDuty = it }
             )
         }
 
@@ -73,13 +76,27 @@ fun RestoreScreen(
             }
         }
     }
+    
+    // Duty Detail Modal (no accept/deny for dismissed duties)
+    selectedDuty?.let { duty ->
+        DutyDetailModal(
+            duty = duty,
+            homeAddress = null,
+            workAddress = null,
+            onSetLocation = { _, _ -> },
+            onAcceptDuty = {},
+            onDenyDuty = {},
+            onDismiss = { selectedDuty = null }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SwipeToRestoreDutyCard(
     duty: Duty,
-    onRestore: () -> Unit
+    onRestore: () -> Unit,
+    onCardClick: (Duty) -> Unit = {}
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
@@ -108,7 +125,10 @@ private fun SwipeToRestoreDutyCard(
             }
         },
         content = {
-            DutyCard(duty = duty)
+            DutyCard(
+                duty = duty,
+                onCardClick = onCardClick
+            )
         }
     )
 }

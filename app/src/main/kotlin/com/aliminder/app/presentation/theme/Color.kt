@@ -17,8 +17,8 @@ val VinylPurple = Color(0xFF6200EE)
 val VinylPurpleVariant = Color(0xFF3700B3)
 val TealAccent = Color(0xFF03DAC5)
 
-// Define the new background color
-val DeepRoyalBlue = Color(0xFF002D62) 
+// Define the background color - lighter royal blue
+val DeepRoyalBlue = Color(0xFF1E3A5F) 
 
 // Background colors
 val BackgroundDark = DeepRoyalBlue       // App background is now Deep Royal Blue

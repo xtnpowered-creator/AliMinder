@@ -16,6 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +26,7 @@ import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
 import com.aliminder.app.presentation.components.DutyCard
+import com.aliminder.app.presentation.components.DutyDetailModal
 import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 
 /**
@@ -45,7 +49,12 @@ fun PendingScreen(
     PendingScreenContent(
         pendingDuties = pendingDuties,
         overallStage = overallStage,
-        useDynamicColor = userSettings.useDynamicTitleBarColor
+        useDynamicColor = userSettings.useDynamicTitleBarColor,
+        homeAddress = userSettings.homeAddress,
+        workAddress = userSettings.workAddress,
+        onSetLocation = viewModel::updateDutyLocation,
+        onAcceptDuty = viewModel::acceptDuty,
+        onDenyDuty = viewModel::denyDuty
     )
 }
 
@@ -53,8 +62,14 @@ fun PendingScreen(
 fun PendingScreenContent(
     pendingDuties: List<Duty>,
     overallStage: PersonaStage,
-    useDynamicColor: Boolean
+    useDynamicColor: Boolean,
+    homeAddress: com.aliminder.app.domain.model.Address?,
+    workAddress: com.aliminder.app.domain.model.Address?,
+    onSetLocation: (String, String) -> Unit = { _, _ -> },
+    onAcceptDuty: (String) -> Unit = {},
+    onDenyDuty: (String) -> Unit = {}
 ) {
+    var selectedDuty by remember { mutableStateOf<Duty?>(null) }
     Scaffold(
         topBar = {
             AliMinderTopAppBar(
@@ -72,7 +87,10 @@ fun PendingScreenContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(pendingDuties) { pendingDuty ->
-                DutyCard(duty = pendingDuty)
+                DutyCard(
+                    duty = pendingDuty,
+                    onCardClick = { selectedDuty = it }
+                )
             }
 
             if (pendingDuties.isEmpty()) {
@@ -97,5 +115,18 @@ fun PendingScreenContent(
                 }
             }
         }
+    }
+    
+    // Duty Detail Modal
+    selectedDuty?.let { duty ->
+        DutyDetailModal(
+            duty = duty,
+            homeAddress = homeAddress,
+            workAddress = workAddress,
+            onSetLocation = onSetLocation,
+            onAcceptDuty = onAcceptDuty,
+            onDenyDuty = onDenyDuty,
+            onDismiss = { selectedDuty = null }
+        )
     }
 }

@@ -9,6 +9,6 @@ data class UserSettings(
     val useDynamicTitleBarColor: Boolean = true,
     val urgencyTimeThreshold: Int = 60,
     val autoHideOverdueMinutes: Int = 120, // Default 2 hours
-    val homeAddress: String? = null,
-    val workAddress: String? = null
+    val homeAddress: Address? = null,
+    val workAddress: Address? = null
 )

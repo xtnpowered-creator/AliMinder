@@ -40,6 +40,7 @@ import com.aliminder.app.domain.model.PoNRCalculation
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
 import com.aliminder.app.presentation.components.DismissalDialog
 import com.aliminder.app.presentation.components.DutyCard
+import com.aliminder.app.presentation.components.DutyDetailModal
 import com.aliminder.app.presentation.mock.MockData
 import com.aliminder.app.presentation.screens.settings.SettingsViewModel
 import com.aliminder.app.presentation.theme.AliMinderTheme
@@ -65,7 +66,12 @@ fun AllScreen(
         duties = filteredDuties,
         overallStage = overallStage,
         useDynamicColor = userSettings.useDynamicTitleBarColor,
-        onDismissDuty = viewModel::dismissDuty
+        homeAddress = userSettings.homeAddress,
+        workAddress = userSettings.workAddress,
+        onDismissDuty = viewModel::dismissDuty,
+        onSetLocation = viewModel::updateDutyLocation,
+        onAcceptDuty = viewModel::acceptDuty,
+        onDenyDuty = viewModel::denyDuty
     )
 }
 
@@ -75,9 +81,15 @@ fun AllScreenContent(
     duties: List<Duty>,
     overallStage: PersonaStage,
     useDynamicColor: Boolean,
-    onDismissDuty: (Duty, DismissalReason) -> Unit
+    homeAddress: com.aliminder.app.domain.model.Address?,
+    workAddress: com.aliminder.app.domain.model.Address?,
+    onDismissDuty: (Duty, DismissalReason) -> Unit,
+    onSetLocation: (String, String) -> Unit = { _, _ -> },
+    onAcceptDuty: (String) -> Unit = {},
+    onDenyDuty: (String) -> Unit = {}
 ) {
     var dutyToDismiss by remember { mutableStateOf<Duty?>(null) }
+    var selectedDuty by remember { mutableStateOf<Duty?>(null) }
 
     Scaffold(
         topBar = {
@@ -124,7 +136,10 @@ fun AllScreenContent(
                         }
                     },
                     content = {
-                        DutyCard(duty = duty)
+                        DutyCard(
+                            duty = duty,
+                            onCardClick = { selectedDuty = it }
+                        )
                     }
                 )
             }
@@ -163,6 +178,19 @@ fun AllScreenContent(
                 onDismissDuty(dutyToDismiss!!, reason)
                 dutyToDismiss = null
             }
+        )
+    }
+    
+    // Duty Detail Modal
+    selectedDuty?.let { duty ->
+        DutyDetailModal(
+            duty = duty,
+            homeAddress = homeAddress,
+            workAddress = workAddress,
+            onSetLocation = onSetLocation,
+            onAcceptDuty = onAcceptDuty,
+            onDenyDuty = onDenyDuty,
+            onDismiss = { selectedDuty = null }
         )
     }
 }
@@ -210,6 +238,8 @@ fun AllScreenPreview() {
                 duties = previewDuties,
                 overallStage = previewStage,
                 useDynamicColor = true,
+                homeAddress = null,
+                workAddress = null,
                 onDismissDuty = { _, _ -> }
             )
         }
