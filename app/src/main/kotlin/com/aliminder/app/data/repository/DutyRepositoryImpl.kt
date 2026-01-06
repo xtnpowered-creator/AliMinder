@@ -37,12 +37,14 @@ class DutyRepositoryImpl @Inject constructor(
                 // Trigger recalculation on either DB change OR location update
                 entities to location
             }
-            .map { (entities, _) ->
+            .map { (entities, locationUpdate) ->
                 // Get user settings for PoNR calculation
                 val userSettings = userSettingsRepository.getUserSettings().first()
                 
-                // Get current location (may have just been updated)
-                val currentLocation = try {
+                // CRITICAL FIX: Use the location from the live update flow!
+                // Previously we called getLastKnownLocation() which might be stale.
+                // If flow location is null (initial state), try getLastKnownLocation as fallback.
+                val currentLocation = locationUpdate ?: try {
                     locationService.getLastKnownLocation()
                 } catch (e: SecurityException) {
                     Log.w(TAG, "Location permission not granted")

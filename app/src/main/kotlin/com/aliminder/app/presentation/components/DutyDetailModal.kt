@@ -1,6 +1,7 @@
 package com.aliminder.app.presentation.components
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -120,6 +121,7 @@ fun DutyDetailModal(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f) // Takes available space
+                                .clickable { onDismiss() } // Tap anywhere in details to dismiss
                                 .verticalScroll(rememberScrollState())
                                 .padding(16.dp)
                         ) {
