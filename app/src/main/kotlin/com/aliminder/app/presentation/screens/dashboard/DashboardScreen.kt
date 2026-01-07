@@ -26,9 +26,7 @@ fun DashboardScreen() {
     Scaffold(
         topBar = {
             AliMinderTopAppBar(
-                title = "Dashboard",
-                overallStage = com.aliminder.app.domain.model.PersonaStage.OPTIMISTIC,
-                useDynamicColor = true
+                title = "Dashboard"
             )
         }
     ) { paddingValues ->
@@ -96,7 +94,7 @@ private fun KpiCard(
                 text = value,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = description,

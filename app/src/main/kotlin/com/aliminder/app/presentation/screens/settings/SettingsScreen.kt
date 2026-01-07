@@ -164,19 +164,7 @@ fun AppTab(userSettings: UserSettings, viewModel: SettingsViewModel) {
         Text("App Behavior", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Enable Dynamic Title Bar Color", style = MaterialTheme.typography.bodyLarge)
-            Switch(
-                checked = userSettings.useDynamicTitleBarColor,
-                onCheckedChange = { viewModel.updateDynamicTitleBarColor(it) }
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
+
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -248,6 +236,19 @@ fun AppTab(userSettings: UserSettings, viewModel: SettingsViewModel) {
                     )
                 }
             }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Reset Demo Data
+        Button(
+            onClick = { viewModel.resetMockData() },
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Reset Demo Data (Fix Dates)")
         }
     }
 }
@@ -351,7 +352,7 @@ fun FiltersTab() {
 
 @Composable
 fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltViewModel()) {
-    var defaultPrep by remember { mutableIntStateOf(userSettings.defaultPrepMinutes) }
+
     var defaultBuffer by remember { mutableIntStateOf(userSettings.defaultBufferMinutes) }
     
     // Address fields
@@ -507,23 +508,7 @@ fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltView
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Default Prep Time", style = MaterialTheme.typography.bodyLarge)
-            Text(text = "$defaultPrep min", style = MaterialTheme.typography.titleMedium)
-        }
-        Slider(
-            value = defaultPrep.toFloat(),
-            onValueChange = { defaultPrep = it.toInt() },
-            valueRange = 0f..30f,
-            steps = 5
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+
             Text(text = "Default Buffer", style = MaterialTheme.typography.bodyLarge)
             Text(text = "$defaultBuffer min", style = MaterialTheme.typography.titleMedium)
         }
@@ -564,7 +549,7 @@ fun AudioTab(
                                 },
                                 trailingContent = {
                                     if (voice == selectedVoice) {
-                                        Text("✓", color = MaterialTheme.colorScheme.primary)
+                                        Text("✓", color = MaterialTheme.colorScheme.secondary)
                                     }
                                 }
                             )
@@ -600,7 +585,7 @@ fun AudioTab(
                     text = engineStatus,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    color = if (isPlaying) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp)) // Fixed: Divider -> HorizontalDivider
                 Text("Last Action: $lastAction", style = MaterialTheme.typography.bodyMedium)
@@ -620,7 +605,7 @@ fun AudioTab(
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text("${availableVoices.size} Voices Available", style = MaterialTheme.typography.bodySmall)
-                    Text("Tap to change", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    Text("Tap to change", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

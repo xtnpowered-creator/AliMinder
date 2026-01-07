@@ -22,17 +22,19 @@ class AllViewModel @Inject constructor(
 ) : ViewModel() {
 
     // Main dashboard shows only non-dismissed duties
-    val duties: StateFlow<List<Duty>> = dutyRepository.getAllDuties()
+    // Main dashboard shows only non-dismissed duties
+    // Null means "Loading", Empty means "No duties"
+    val duties: StateFlow<List<Duty>?> = dutyRepository.getAllDuties()
         .map { allDuties -> allDuties.filter { !it.isDismissed } }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = null
         )
 
     val overallStage: StateFlow<PersonaStage> = duties
         .map { dutyList ->
-            dutyList.minByOrNull { it.delta }?.getPersonaStage() ?: PersonaStage.OPTIMISTIC
+            dutyList?.minByOrNull { it.delta }?.getPersonaStage() ?: PersonaStage.OPTIMISTIC
         }
         .stateIn(
             scope = viewModelScope,

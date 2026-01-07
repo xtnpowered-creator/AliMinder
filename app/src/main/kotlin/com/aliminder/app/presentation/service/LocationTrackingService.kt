@@ -18,6 +18,8 @@ import com.aliminder.app.presentation.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -86,9 +88,17 @@ class LocationTrackingService : Service() {
         // Start location tracking and activity recognition
         locationService.startTracking()
         
-        // Calculate nearest duty PoNR time for batching optimization
+        // Calculate nearest duty PoNR time for batching/priority optimization.
+        // Recalculate every minute to keep urgency status fresh.
         CoroutineScope(Dispatchers.IO).launch {
-            locationService.calculateAndUpdateNearestDutyPoNR(dutyRepository)
+            while (isActive) {
+                try {
+                    locationService.calculateAndUpdateNearestDutyPoNR(dutyRepository)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in PoNR update loop", e)
+                }
+                delay(60_000) // 1 minute
+            }
         }
         
         // Service will be restarted if killed by system

@@ -21,7 +21,7 @@ data class MockEvent(
     val title: String,
     val startTime: LocalDateTime,
     val commuteMinutes: Int,
-    val prepMinutes: Int,
+    // prepMinutes removed
     val bufferMinutes: Int,
     val category: String = "Work",
     val source: String = "Shadow" // Shadow, M365, Google
@@ -29,7 +29,6 @@ data class MockEvent(
     val ponr: LocalDateTime
         get() = startTime
             .minusMinutes(commuteMinutes.toLong())
-            .minusMinutes(prepMinutes.toLong())
             .minusMinutes(bufferMinutes.toLong())
     
     val deltaMinutes: Long
@@ -73,7 +72,7 @@ object MockData {
             title = "Team Stand-up",
             startTime = LocalDateTime.now().minusMinutes(10),
             commuteMinutes = 0,
-            prepMinutes = 5,
+
             bufferMinutes = 5,
             category = "Meeting"
         ),
@@ -84,7 +83,7 @@ object MockData {
             title = "1:1 with Manager",
             startTime = LocalDateTime.now().plusMinutes(45),
             commuteMinutes = 15,
-            prepMinutes = 5,
+
             bufferMinutes = 5,
             category = "Meeting"
         ),
@@ -95,7 +94,7 @@ object MockData {
             title = "Dentist Appointment",
             startTime = LocalDateTime.now().plusHours(2),
             commuteMinutes = 25,
-            prepMinutes = 10,
+
             bufferMinutes = 15,
             category = "Personal"
         ),
@@ -106,7 +105,7 @@ object MockData {
             title = "Client Presentation",
             startTime = LocalDateTime.now().plusHours(3),
             commuteMinutes = 30,
-            prepMinutes = 20,
+
             bufferMinutes = 10,
             category = "Meeting"
         ),
@@ -117,7 +116,7 @@ object MockData {
             title = "Lunch with Sarah",
             startTime = LocalDateTime.now().plusMinutes(35),
             commuteMinutes = 15,
-            prepMinutes = 5,
+
             bufferMinutes = 5,
             category = "Social"
         ),
@@ -128,7 +127,7 @@ object MockData {
             title = "Submit Weekly Report",
             startTime = LocalDateTime.now().plusHours(4),
             commuteMinutes = 0,
-            prepMinutes = 15,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -137,7 +136,7 @@ object MockData {
             title = "Buy Groceries",
             startTime = LocalDateTime.now().plusHours(5),
             commuteMinutes = 15,
-            prepMinutes = 5,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -148,7 +147,7 @@ object MockData {
             title = "Project Kickoff (Invite)",
             startTime = LocalDateTime.now().plusDays(1).plusHours(2),
             commuteMinutes = 0,
-            prepMinutes = 10,
+
             bufferMinutes = 0,
             category = "Pending"
         ),
@@ -157,7 +156,7 @@ object MockData {
             title = "Happy Hour (Invite)",
             startTime = LocalDateTime.now().plusDays(2).plusHours(6),
             commuteMinutes = 20,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Pending"
         ),
@@ -170,7 +169,7 @@ object MockData {
             title = "Morning Gym Session",
             startTime = LocalDateTime.now().plusDays(1).withHour(7).withMinute(0),
             commuteMinutes = 15,
-            prepMinutes = 10,
+
             bufferMinutes = 5,
             category = "Personal"
         ),
@@ -181,7 +180,7 @@ object MockData {
             title = "Code Review Meeting",
             startTime = LocalDateTime.now().plusDays(1).withHour(10).withMinute(30),
             commuteMinutes = 0,
-            prepMinutes = 5,
+
             bufferMinutes = 0,
             category = "Meeting"
         ),
@@ -192,7 +191,7 @@ object MockData {
             title = "Update Jira Tickets",
             startTime = LocalDateTime.now().plusDays(1).withHour(14).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -203,7 +202,7 @@ object MockData {
             title = "Dinner Prep",
             startTime = LocalDateTime.now().plusHours(6),
             commuteMinutes = 0,
-            prepMinutes = 30,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -214,7 +213,7 @@ object MockData {
             title = "Movie Night with Friends",
             startTime = LocalDateTime.now().plusDays(1).withHour(19).withMinute(0),
             commuteMinutes = 25,
-            prepMinutes = 15,
+
             bufferMinutes = 10,
             category = "Social"
         ),
@@ -225,7 +224,7 @@ object MockData {
             title = "Flight Check-in",
             startTime = LocalDateTime.now().plusDays(1).withHour(6).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -236,7 +235,7 @@ object MockData {
             title = "Deep Work: Architecture",
             startTime = LocalDateTime.now().plusDays(1).withHour(13).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 10,
+
             bufferMinutes = 0,
             category = "Work"
         ),
@@ -247,7 +246,7 @@ object MockData {
             title = "Quick Sync",
             startTime = LocalDateTime.now().plusHours(1).plusMinutes(15),
             commuteMinutes = 0,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Meeting"
         ),
@@ -258,7 +257,7 @@ object MockData {
             title = "Doctor Follow-up (Tentative)",
             startTime = LocalDateTime.now().plusDays(1).withHour(15).withMinute(0),
             commuteMinutes = 20,
-            prepMinutes = 0,
+
             bufferMinutes = 5,
             category = "Pending"
         ),
@@ -269,7 +268,7 @@ object MockData {
             title = "Quarterly Planning",
             startTime = LocalDateTime.now().plusDays(2).withHour(9).withMinute(0),
             commuteMinutes = 30,
-            prepMinutes = 15,
+
             bufferMinutes = 10,
             category = "Meeting"
         ),
@@ -280,7 +279,7 @@ object MockData {
             title = "Pay Utility Bills",
             startTime = LocalDateTime.now().plusDays(2).withHour(12).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 5,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -291,7 +290,7 @@ object MockData {
             title = "Water Plants",
             startTime = LocalDateTime.now().plusHours(3).plusMinutes(30),
             commuteMinutes = 0,
-            prepMinutes = 10,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -302,7 +301,7 @@ object MockData {
             title = "Coffee with Mentor",
             startTime = LocalDateTime.now().plusDays(1).withHour(8).withMinute(30),
             commuteMinutes = 15,
-            prepMinutes = 5,
+
             bufferMinutes = 5,
             category = "Social"
         ),
@@ -313,7 +312,7 @@ object MockData {
             title = "Grocery Shopping",
             startTime = LocalDateTime.now().plusDays(2).withHour(17).withMinute(30),
             commuteMinutes = 10,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Task"
         ),
@@ -324,7 +323,7 @@ object MockData {
             title = "Team Retro",
             startTime = LocalDateTime.now().plusDays(1).withHour(16).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 5,
+
             bufferMinutes = 0,
             category = "Meeting"
         ),
@@ -335,7 +334,7 @@ object MockData {
             title = "Workshop: Kotlin Flows",
             startTime = LocalDateTime.now().plusDays(2).withHour(11).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Work"
         ),
@@ -346,7 +345,7 @@ object MockData {
             title = "Journaling",
             startTime = LocalDateTime.now().plusHours(8),
             commuteMinutes = 0,
-            prepMinutes = 15,
+
             bufferMinutes = 0,
             category = "Personal"
         ),
@@ -357,7 +356,7 @@ object MockData {
             title = "Lunch & Learn (Invite)",
             startTime = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Pending"
         ),
@@ -368,7 +367,7 @@ object MockData {
             title = "Game Night",
             startTime = LocalDateTime.now().plusDays(2).withHour(20).withMinute(0),
             commuteMinutes = 20,
-            prepMinutes = 30,
+
             bufferMinutes = 0,
             category = "Social"
         ),
@@ -379,7 +378,7 @@ object MockData {
             title = "Prepare Presentation Deck",
             startTime = LocalDateTime.now().plusDays(1).withHour(21).withMinute(0),
             commuteMinutes = 0,
-            prepMinutes = 0,
+
             bufferMinutes = 0,
             category = "Task"
         )

@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,16 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
+import com.aliminder.app.domain.model.PoNRDataQuality
 import com.aliminder.app.presentation.mock.MockData
 import com.aliminder.app.presentation.theme.LateRed
 import com.aliminder.app.presentation.theme.OptimisticGreen
 import com.aliminder.app.presentation.theme.UrgentOrange
 import com.aliminder.app.presentation.theme.WearyYellow
 
-/**
- * Detailed breakdown of the PoNR calculation.
- * Formula: PoNR = StartTime - (Travel + Prep + Buffer)
- */
 @Composable
 fun PoNRMathCard(
     duty: Duty,
@@ -51,13 +51,16 @@ fun PoNRMathCard(
         val timeLabel = if (isTask) "Due Time" else "Start Time"
         MathRow(timeLabel, MockData.formatTime(duty.startTime))
         
-        // Travel, Prep, Buffer logic - use actual values from PoNR calculation
+        // Travel, Buffer logic - use actual values from PoNR calculation
         val travel = duty.ponr?.commuteMinutes ?: 0
-        val prep = duty.ponr?.prepMinutes ?: 15
         val buffer = duty.ponr?.bufferMinutes ?: 10
+        val quality = duty.ponr?.dataQuality ?: PoNRDataQuality.GOOD
         
-        MathRow("- Travel", "$travel min")
-        MathRow("- Prep", "$prep min")
+        MathRow(
+            label = "- Travel", 
+            value = "$travel min",
+            quality = if (!isTask) quality else PoNRDataQuality.GOOD // Only warn for travel-reliant events
+        )
         MathRow("- Buffer", "$buffer min")
         
         HorizontalDivider(
@@ -91,22 +94,54 @@ fun PoNRMathCard(
 }
 
 @Composable
-private fun MathRow(label: String, value: String) {
+private fun MathRow(
+    label: String, 
+    value: String,
+    quality: PoNRDataQuality = PoNRDataQuality.GOOD
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
-        )
+        
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            if (quality != PoNRDataQuality.GOOD) {
+                val (color, text) = when (quality) {
+                    PoNRDataQuality.STALE -> WearyYellow to "STALE"
+                    PoNRDataQuality.COARSE -> UrgentOrange to "COARSE"
+                    else -> MaterialTheme.colorScheme.error to "ERROR"
+                }
+                
+                Icon(
+                    imageVector = Icons.Rounded.Warning,
+                    contentDescription = text,
+                    tint = color,
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .height(14.dp)
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = color,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
+            
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }

@@ -202,11 +202,44 @@ class LocationService @Inject constructor(
     /**
      * Create location request based on tracking state.
      */
+
+    private var isAppForeground: Boolean = false // Track app visibility for power optimization
+
+    /**
+     * Update foreground state to optimize GPS power usage.
+     * High Accuracy is only used when App is Foreground AND State is Active.
+     */
+    fun setForegroundState(inForeground: Boolean) {
+        if (isAppForeground != inForeground) {
+            isAppForeground = inForeground
+            Log.d(TAG, "App foreground state changed: $inForeground. Restarting updates for power optimization.")
+            // Restart updates to apply new priority if needed
+            restartLocationUpdates(_trackingState.value)
+        }
+    }
+
+    /**
+     * Create location request based on tracking state.
+     */
     private fun createLocationRequest(state: TrackingState): LocationRequest {
         val (shouldBatch, batchDelay) = state.shouldBatch()
         
+        // Only use HIGH_ACCURACY if:
+        // 1. Moving (Active)
+        // 2. User looking at app (Foreground)
+        // 3. Imminent Duty (PoNR < 60 min or passed)
+        val isUrgent = state is TrackingState.Active && 
+                       state.minutesToNearestDutyPoNR != null && 
+                       state.minutesToNearestDutyPoNR < 60
+
+        val priority = if (isUrgent && isAppForeground) {
+            Priority.PRIORITY_HIGH_ACCURACY
+        } else {
+            Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        }
+
         return LocationRequest.Builder(
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+            priority,
             state.getUpdateIntervalMs()
         ).apply {
             setMinUpdateIntervalMillis(state.getFastestIntervalMs())
@@ -286,9 +319,12 @@ class LocationService @Inject constructor(
             val duties = dutyRepository.getAllDuties().first()
             val now = java.time.LocalDateTime.now()
             
-            // Find upcoming duties with calculated PoNR
+            // Find upcoming duties with calculated PoNR and a PHYSICAL location
+            // We ignore Virtual meetings/Tasks without addresses for GPS urgency
             val upcomingDuties = duties.filter { duty ->
-                duty.ponr != null && duty.ponr.ponrTime.isAfter(now)
+                duty.ponr != null && 
+                duty.ponr.ponrTime.isAfter(now) &&
+                !duty.location.isNullOrBlank()
             }
             
             if (upcomingDuties.isEmpty()) {

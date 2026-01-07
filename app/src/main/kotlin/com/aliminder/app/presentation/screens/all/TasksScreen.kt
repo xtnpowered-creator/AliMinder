@@ -50,16 +50,14 @@ fun TasksScreen(
 ) {
     // Observe state from ViewModel
     val allDuties by viewModel.duties.collectAsState()
-    val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
-    // Filter for Tasks (Only category "SHADOW_TASK")
-    val tasks = allDuties.filter { it.category == "SHADOW_TASK" } // Updated category name
+    // Filter for Tasks (Category "Task")
+    // Handle null (loading) by returning null
+    val tasks = allDuties?.filter { it.category == "Task" }
 
     TasksScreenContent(
         tasks = tasks,
-        overallStage = overallStage,
-        useDynamicColor = userSettings.useDynamicTitleBarColor,
         homeAddress = userSettings.homeAddress,
         workAddress = userSettings.workAddress,
         onDismissDuty = viewModel::dismissDuty,
@@ -72,9 +70,7 @@ fun TasksScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksScreenContent(
-    tasks: List<Duty>,
-    overallStage: PersonaStage,
-    useDynamicColor: Boolean,
+    tasks: List<Duty>?, // Nullable
     homeAddress: com.aliminder.app.domain.model.Address?,
     workAddress: com.aliminder.app.domain.model.Address?,
     onDismissDuty: (Duty, DismissalReason) -> Unit = { _, _ -> },
@@ -82,107 +78,15 @@ fun TasksScreenContent(
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
-    var dutyToDismiss by remember { mutableStateOf<Duty?>(null) }
-    var selectedDuty by remember { mutableStateOf<Duty?>(null) }
-
-    Scaffold(
-        topBar = {
-            AliMinderTopAppBar(
-                title = "Upcoming Tasks",
-                overallStage = overallStage,
-                useDynamicColor = useDynamicColor
-            )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Task list
-            items(tasks, key = { it.id }) { task ->
-                 val dismissState = rememberSwipeToDismissBoxState(
-                    confirmValueChange = {
-                        if (it == SwipeToDismissBoxValue.StartToEnd) {
-                            dutyToDismiss = task
-                            return@rememberSwipeToDismissBoxState false
-                        }
-                        false
-                    },
-                    positionalThreshold = { it * 0.75f } // Require 75% swipe distance
-                )
-
-                SwipeToDismissBox(
-                    state = dismissState,
-                    backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Transparent)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) { 
-                            // Background is transparent to fix the corner issue
-                        }
-                    },
-                    content = {
-                        DutyCard(
-                            duty = task,
-                            onCardClick = { selectedDuty = it }
-                        )
-                    }
-                )
-            }
-
-            // Empty state (if list is empty)
-            if (tasks.isEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(32.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "No tasks scheduled",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Dismissal Dialog
-    if (dutyToDismiss != null) {
-        DismissalDialog(
-            duty = dutyToDismiss!!,
-            onDismissRequest = { dutyToDismiss = null },
-            onConfirm = { reason ->
-                onDismissDuty(dutyToDismiss!!, reason)
-                dutyToDismiss = null
-            }
-        )
-    }
-    
-    // Duty Detail Modal
-    selectedDuty?.let { duty ->
-        DutyDetailModal(
-            duty = duty,
-            homeAddress = homeAddress,
-            workAddress = workAddress,
-            onSetLocation = onSetLocation,
-            onAcceptDuty = onAcceptDuty,
-            onDenyDuty = onDenyDuty,
-            onDismiss = { selectedDuty = null }
-        )
-    }
+    SharedDutyListContent(
+        title = "Upcoming Tasks",
+        duties = tasks,
+        emptyStateMessage = "No tasks scheduled",
+        homeAddress = homeAddress,
+        workAddress = workAddress,
+        onDismissDuty = onDismissDuty,
+        onSetLocation = onSetLocation,
+        onAcceptDuty = onAcceptDuty,
+        onDenyDuty = onDenyDuty
+    )
 }

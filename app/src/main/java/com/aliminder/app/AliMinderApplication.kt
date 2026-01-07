@@ -19,6 +19,7 @@ class AliMinderApplication : Application(), Configuration.Provider {
     
     override fun onCreate() {
         super.onCreate()
+        Thread.setDefaultUncaughtExceptionHandler(com.aliminder.app.presentation.util.GlobalCrashHandler())
         scheduleProactiveLocationTracking()
     }
     

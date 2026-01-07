@@ -239,11 +239,14 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 val now = java.time.LocalDateTime.now()
                 val twoHoursFromNow = now.plusHours(2)
                 
-                // Check if any duties have PoNR within next 2 hours
+                // Check if any PHYSICAL duties have PoNR within next 2 hours
                 val hasUpcomingDuties = duties.any { duty ->
-                    duty.ponr?.ponrTime?.let { ponrTime ->
+                    val hasLocation = !duty.location.isNullOrBlank()
+                    val isImminent = duty.ponr?.ponrTime?.let { ponrTime ->
                         ponrTime.isAfter(now) && ponrTime.isBefore(twoHoursFromNow)
                     } ?: false
+                    
+                    hasLocation && isImminent
                 }
                 
                 if (hasUpcomingDuties) {

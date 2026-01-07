@@ -35,10 +35,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateDynamicTitleBarColor(enabled: Boolean) {
-        val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
-        userSettingsDao.insert(currentSettings.copy(useDynamicTitleBarColor = enabled))
-    }
+
 
     override suspend fun updateUrgencyTimeThreshold(minutes: Int) {
         val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
@@ -108,11 +105,11 @@ class UserSettingsRepositoryImpl @Inject constructor(
 fun UserSettingsEntity.toDomainModel(): UserSettings {
     return UserSettings(
         isFirstLaunch = isFirstLaunch,
-        defaultPrepMinutes = defaultPrepMinutes,
+        // defaultPrepMinutes ignored
         defaultBufferMinutes = defaultBufferMinutes,
         audioRespectsSilentMode = audioRespectsSilentMode,
         audioVoiceSelection = audioVoiceSelection,
-        useDynamicTitleBarColor = useDynamicTitleBarColor,
+
         urgencyTimeThreshold = urgencyTimeThreshold,
         autoHideOverdueMinutes = autoHideOverdueMinutes,
         homeAddress = if (homeStreet != null && homeCity != null && homeState != null && homeZip != null) {
@@ -127,11 +124,11 @@ fun UserSettingsEntity.toDomainModel(): UserSettings {
 fun UserSettings.toEntity(): UserSettingsEntity {
     return UserSettingsEntity(
         isFirstLaunch = isFirstLaunch,
-        defaultPrepMinutes = defaultPrepMinutes,
+        // defaultPrepMinutes ignored (uses default value in Entity)
         defaultBufferMinutes = defaultBufferMinutes,
         audioRespectsSilentMode = audioRespectsSilentMode,
         audioVoiceSelection = audioVoiceSelection,
-        useDynamicTitleBarColor = useDynamicTitleBarColor,
+
         urgencyTimeThreshold = urgencyTimeThreshold,
         autoHideOverdueMinutes = autoHideOverdueMinutes,
         homeStreet = homeAddress?.street,

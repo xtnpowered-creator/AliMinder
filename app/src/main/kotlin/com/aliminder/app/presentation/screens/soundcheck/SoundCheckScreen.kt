@@ -39,13 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.presentation.components.AliMinderTopAppBar
-import com.aliminder.app.presentation.screens.settings.SettingsViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SoundCheckScreen(
-    viewModel: SoundCheckViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel() // Inject SettingsViewModel
+    viewModel: SoundCheckViewModel = hiltViewModel()
 ) {
     val engineStatus by viewModel.engineStatus.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
@@ -53,8 +52,7 @@ fun SoundCheckScreen(
     val availableVoices by viewModel.availableVoices.collectAsState()
     val selectedVoice by viewModel.selectedVoice.collectAsState()
     
-    // Get settings for dynamic top bar color
-    val userSettings by settingsViewModel.userSettings.collectAsState()
+
 
     var showVoiceDialog by remember { mutableStateOf(false) }
 
@@ -74,7 +72,7 @@ fun SoundCheckScreen(
                                 },
                                 trailingContent = {
                                     if (voice == selectedVoice) {
-                                        Text("✓", color = MaterialTheme.colorScheme.primary)
+                                        Text("✓", color = MaterialTheme.colorScheme.secondary)
                                     }
                                 }
                             )
@@ -94,9 +92,7 @@ fun SoundCheckScreen(
     Scaffold(
         topBar = {
             AliMinderTopAppBar(
-                title = "Vinyl Lab (Sound Check)",
-                overallStage = PersonaStage.OPTIMISTIC, // Static for this screen or bind to something? For now static.
-                useDynamicColor = userSettings.useDynamicTitleBarColor
+                title = "Vinyl Lab (Sound Check)"
             )
         }
     ) { padding ->
@@ -123,7 +119,7 @@ fun SoundCheckScreen(
                         text = engineStatus,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        color = if (isPlaying) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
                     )
                     HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                     Text("Last Action: $lastAction", style = MaterialTheme.typography.bodyMedium)
@@ -153,7 +149,7 @@ fun SoundCheckScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("${availableVoices.size} Voices Available", style = MaterialTheme.typography.bodySmall)
-                        Text("Tap to change", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                        Text("Tap to change", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

@@ -43,11 +43,15 @@ class ProactiveLocationTrackingWorker @AssistedInject constructor(
             val now = LocalDateTime.now()
             val oneHourFromNow = now.plusHours(PROACTIVE_WINDOW_HOURS)
             
-            // Find duties with PoNR within the next hour
+            // Find duties with PoNR within the next hour AND a physical location
+            // We do not start location tracking for virtual meetings or Tasks without addresses
             val upcomingDuties = duties.filter { duty ->
-                duty.ponr?.ponrTime?.let { ponrTime ->
+                val hasLocation = !duty.location.isNullOrBlank()
+                val isApproaching = duty.ponr?.ponrTime?.let { ponrTime ->
                     ponrTime.isAfter(now) && ponrTime.isBefore(oneHourFromNow)
                 } ?: false
+                
+                hasLocation && isApproaching
             }
             
             if (upcomingDuties.isNotEmpty()) {

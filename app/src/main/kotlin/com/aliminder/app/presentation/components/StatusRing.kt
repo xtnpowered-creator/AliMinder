@@ -41,18 +41,19 @@ fun StatusRing(
         PersonaStage.LATE -> LateRed
     }
 
-    val finalWidth = size * 1.32f // 10% wider than 1.2f (1.2 * 1.1)
-    val finalHeight = size * 1.1f
+    val finalWidth = size * 1.452f // Another 10% wider (1.32 * 1.1)
+    val finalHeight = size * 0.99f // 10% shorter (1.1 * 0.9)
     
     Box(
         modifier = modifier.size(width = finalWidth, height = finalHeight),
-        contentAlignment = Alignment.Center // This will now work correctly
+        contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val strokeWidthPx = strokeWidth.toPx()
             
-            val width = size.toPx() * 1.32f - strokeWidthPx
-            val height = size.toPx() * 1.1f - strokeWidthPx
+            // Use actual canvas size (which matches the Box) minus stroke padding
+            val width = this.size.width - strokeWidthPx
+            val height = this.size.height - strokeWidthPx
 
             val squircleFactor = 0.8f 
             val controlPointHorizontal = (width / 2f) * squircleFactor

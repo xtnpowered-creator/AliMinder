@@ -56,16 +56,14 @@ fun AllScreen(
 ) {
     // Observe state from ViewModel
     val duties by viewModel.duties.collectAsState()
-    val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
     // Filter out Pending invites from the main dashboard
-    val filteredDuties = duties.filter { it.category != "Pending" }
+    // If duties is null (loading), result is null.
+    val filteredDuties = duties?.filter { it.category != "Pending" }
 
     AllScreenContent(
         duties = filteredDuties,
-        overallStage = overallStage,
-        useDynamicColor = userSettings.useDynamicTitleBarColor,
         homeAddress = userSettings.homeAddress,
         workAddress = userSettings.workAddress,
         onDismissDuty = viewModel::dismissDuty,
@@ -78,9 +76,7 @@ fun AllScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllScreenContent(
-    duties: List<Duty>,
-    overallStage: PersonaStage,
-    useDynamicColor: Boolean,
+    duties: List<Duty>?, // Nullable
     homeAddress: com.aliminder.app.domain.model.Address?,
     workAddress: com.aliminder.app.domain.model.Address?,
     onDismissDuty: (Duty, DismissalReason) -> Unit,
@@ -88,111 +84,17 @@ fun AllScreenContent(
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
-    var dutyToDismiss by remember { mutableStateOf<Duty?>(null) }
-    var selectedDuty by remember { mutableStateOf<Duty?>(null) }
-
-    Scaffold(
-        topBar = {
-            AliMinderTopAppBar(
-                title = "All Upcoming Duties",
-                overallStage = overallStage,
-                useDynamicColor = useDynamicColor
-            )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Duty list
-            items(duties, key = { it.id }) { duty ->
-                // Swipe to dismiss
-                val dismissState = rememberSwipeToDismissBoxState(
-                    confirmValueChange = {
-                        if (it == SwipeToDismissBoxValue.StartToEnd) {
-                            dutyToDismiss = duty
-                            // Don't dismiss yet, wait for dialog
-                            return@rememberSwipeToDismissBoxState false 
-                        }
-                        false
-                    },
-                    positionalThreshold = { it * 0.75f } // Require 75% swipe distance
-                )
-
-                SwipeToDismissBox(
-                    state = dismissState,
-                    backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Transparent)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                           // Transparent background
-                        }
-                    },
-                    content = {
-                        DutyCard(
-                            duty = duty,
-                            onCardClick = { selectedDuty = it }
-                        )
-                    }
-                )
-            }
-
-            // Empty state (if list is empty)
-            if (duties.isEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(32.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "No duties scheduled",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    // Dismissal Dialog
-    if (dutyToDismiss != null) {
-        DismissalDialog(
-            duty = dutyToDismiss!!,
-            onDismissRequest = { dutyToDismiss = null },
-            onConfirm = { reason ->
-                onDismissDuty(dutyToDismiss!!, reason)
-                dutyToDismiss = null
-            }
-        )
-    }
-    
-    // Duty Detail Modal
-    selectedDuty?.let { duty ->
-        DutyDetailModal(
-            duty = duty,
-            homeAddress = homeAddress,
-            workAddress = workAddress,
-            onSetLocation = onSetLocation,
-            onAcceptDuty = onAcceptDuty,
-            onDenyDuty = onDenyDuty,
-            onDismiss = { selectedDuty = null }
-        )
-    }
+    SharedDutyListContent(
+        title = "All Upcoming Duties",
+        duties = duties,
+        emptyStateMessage = "No duties scheduled",
+        homeAddress = homeAddress,
+        workAddress = workAddress,
+        onDismissDuty = onDismissDuty,
+        onSetLocation = onSetLocation,
+        onAcceptDuty = onAcceptDuty,
+        onDenyDuty = onDenyDuty
+    )
 }
 
 @Preview(name = "AllScreen Preview", showBackground = true)
@@ -213,7 +115,7 @@ fun AllScreenPreview() {
                     eventId = mockEvent.id,
                     eventTime = mockEvent.startTime,
                     commuteMinutes = mockEvent.commuteMinutes,
-                    prepMinutes = mockEvent.prepMinutes,
+                    // prepMinutes removed
                     bufferMinutes = mockEvent.bufferMinutes,
                     ponrTime = mockEvent.ponr,
                     deltaMinutes = mockEvent.deltaMinutes.toInt(),
@@ -231,13 +133,11 @@ fun AllScreenPreview() {
         }.sortedBy { it.delta }
 
         // Determine stage for preview
-        val previewStage = previewDuties.firstOrNull()?.getPersonaStage() ?: PersonaStage.OPTIMISTIC
+        // previewStage removed
 
         Surface(color = MaterialTheme.colorScheme.background) {
             AllScreenContent(
                 duties = previewDuties,
-                overallStage = previewStage,
-                useDynamicColor = true,
                 homeAddress = null,
                 workAddress = null,
                 onDismissDuty = { _, _ -> }

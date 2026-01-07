@@ -47,9 +47,6 @@ data class Duty(
     /** Custom commute time (minutes) - overrides default */
     val customCommuteMinutes: Int? = null,
     
-    /** Custom prep time (minutes) - overrides default */
-    val customPrepMinutes: Int? = null,
-    
     /** Custom buffer (minutes) - overrides default */
     val customBufferMinutes: Int? = null,
     
@@ -58,6 +55,9 @@ data class Duty(
     
     /** PoNR calculation result (computed) */
     val ponr: PoNRCalculation? = null,
+
+    /** User-facing source tag (e.g., "MS-CAL", "GW-TASK") */
+    val sourceTag: String? = null,
     
     /** Delta minutes (computed from PoNR) */
     val delta: Int = Int.MAX_VALUE,
@@ -66,7 +66,19 @@ data class Duty(
     val isAllDay: Boolean = false,
 
     /** Reason why the duty was dismissed/hidden */
-    val dismissalReason: DismissalReason? = null
+    val dismissalReason: DismissalReason? = null,
+    
+    /**
+     * Last successfully calculated commute time (minutes).
+     * Used as fallback when real-time location is unavailable (STALE data).
+     */
+    val lastCalculatedCommuteMinutes: Int? = null,
+
+    /**
+     * Link or description for virtual meetings (e.g., "Microsoft Teams Meeting", Zoom URL).
+     * Populated when the event is remote, ensuring simple PoNR calculation (0 travel).
+     */
+    val virtualMeetingLink: String? = null
 ) {
     /**
      * Whether duty has been dismissed/snoozed.
@@ -89,12 +101,7 @@ data class Duty(
         return customCommuteMinutes ?: defaultMinutes
     }
     
-    /**
-     * Returns the effective prep minutes (custom or default).
-     */
-    fun getEffectivePrepMinutes(defaultMinutes: Int): Int {
-        return customPrepMinutes ?: defaultMinutes
-    }
+
     
     /**
      * Returns the effective buffer minutes (custom or default).

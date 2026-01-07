@@ -13,8 +13,8 @@ val WearyOrange = UrgentOrange
 val GraveRed = LateRed
 
 // Primary brand colors
-val VinylPurple = Color(0xFF6200EE)
-val VinylPurpleVariant = Color(0xFF3700B3)
+val AliBlue = Color(0xFF2979FF) // Electric Blue (Google/Pixel Blue style)
+val AliBlueVariant = Color(0xFF1565C0) // Darker variant
 val TealAccent = Color(0xFF03DAC5)
 
 // Define the background color - lighter royal blue

@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.aliminder.app.domain.service.LocationService // Added import
 import com.aliminder.app.domain.worker.AutoHideDutiesWorker
 import com.aliminder.app.presentation.components.LocationPermissionsManager
 import com.aliminder.app.presentation.navigation.AppNavigation
@@ -26,6 +27,9 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @javax.inject.Inject
+    lateinit var locationService: LocationService // Injected service
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +37,15 @@ class MainActivity : ComponentActivity() {
         // Lifecycle observer to trigger auto-hide check when app is started
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) {
+                // App entered foreground
+                locationService.setForegroundState(true)
+                
                 val workManager = WorkManager.getInstance(applicationContext)
                 val oneTimeWorkRequest = OneTimeWorkRequestBuilder<AutoHideDutiesWorker>().build()
                 workManager.enqueue(oneTimeWorkRequest)
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                // App entered background
+                locationService.setForegroundState(false)
             }
         }
 

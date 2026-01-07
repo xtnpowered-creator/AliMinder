@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -174,6 +175,25 @@ fun DutyDetailModal(
                                     Text(
                                         text = duty.location,
                                         style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            } else if (duty.virtualMeetingLink != null) {
+                                // Virtual Meeting Display
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Phone,
+                                        contentDescription = "Virtual Meeting",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = duty.virtualMeetingLink, // e.g. "Microsoft Teams Meeting"
+                                        style = MaterialTheme.typography.bodyLarge
+                                        // color removed to use default onSurface for readability
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))

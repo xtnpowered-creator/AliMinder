@@ -96,7 +96,9 @@ class ActivityRecognitionService @Inject constructor(
      * Create PendingIntent for activity recognition updates.
      */
     private fun createPendingIntent(): PendingIntent {
-        val intent = Intent(ACTION_ACTIVITY_TRANSITION)
+        val intent = Intent(ACTION_ACTIVITY_TRANSITION).apply {
+            setPackage(context.packageName) // Fix: Make intent explicit for Android 14+
+        }
         return PendingIntent.getBroadcast(
             context,
             0,

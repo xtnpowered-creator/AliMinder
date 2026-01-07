@@ -10,11 +10,22 @@ import com.aliminder.app.domain.model.Duty
  */
 fun DutyEntity.toDomainDuty(): Duty {
     // Determine Category based on acceptance status first
+    // Determine Category based on acceptance status first
     val category = when {
         acceptanceStatus == "PENDING" -> "Pending"
+        // Prioritize Task keywords
+        sourceType.contains("TASK", ignoreCase = true) || 
+        sourceType.contains("TODO", ignoreCase = true) ||
+        sourceType.contains("PLAN", ignoreCase = true) || // MS-PLAN, MS-PLANNER
+        sourceType.contains("GW-TASK", ignoreCase = true) -> "Task"
+        
+        // Then check for Events
+        sourceType.contains("CAL", ignoreCase = true) || 
         sourceType.contains("EVENT", ignoreCase = true) -> "Event"
-        sourceType.contains("TASK", ignoreCase = true) -> "Task"
-        else -> sourceType // Fallback to raw sourceType
+        
+        // Fallback team approvals to Task
+        sourceType.contains("TEAM", ignoreCase = true) || sourceType.contains("APPROVAL", ignoreCase = true) -> "Task" 
+        else -> "Event" // Default fallback
     }
 
     return Duty(
@@ -26,14 +37,17 @@ fun DutyEntity.toDomainDuty(): Duty {
         location = location,
         provider = provider,
         customCommuteMinutes = customCommuteMinutes,
-        customPrepMinutes = customPrepMinutes,
+        // customPrepMinutes ignored
         customBufferMinutes = customBufferMinutes,
         category = category,
+        sourceTag = sourceType, // Pass the raw source type as the tag (e.g., "MS-CAL")
         ponr = null, // Will be calculated by Use Case in repository
         delta = Int.MAX_VALUE, // Will be set by repository
         isAllDay = isAllDay,
         dismissalReason = dismissalReason?.let { runCatching { DismissalReason.valueOf(it) }.getOrNull() } 
-            ?: if (isDeleted) DismissalReason.USER_HIDDEN else null
+            ?: if (isDeleted) DismissalReason.USER_HIDDEN else null,
+        lastCalculatedCommuteMinutes = lastCalculatedCommuteMinutes,
+        virtualMeetingLink = virtualMeetingLink
     )
 }
 
@@ -47,13 +61,15 @@ fun Duty.toDutyEntity(): DutyEntity {
         location = location,
         provider = provider,
         providerDutyId = id, // Assuming the domain ID is the provider ID for now
-        sourceType = category ?: "SHADOW_EVENT",
+        sourceType = sourceTag ?: category ?: "SHADOW_EVENT", // Prefer sourceTag
         acceptanceStatus = if (category == "Pending") "PENDING" else "ACCEPTED",
         customCommuteMinutes = customCommuteMinutes,
-        customPrepMinutes = customPrepMinutes,
+        // customPrepMinutes ignored
         customBufferMinutes = customBufferMinutes,
         isAllDay = isAllDay,
         isDeleted = isDismissed,
-        dismissalReason = dismissalReason?.name
+        dismissalReason = dismissalReason?.name,
+        lastCalculatedCommuteMinutes = lastCalculatedCommuteMinutes,
+        virtualMeetingLink = virtualMeetingLink
     )
 }

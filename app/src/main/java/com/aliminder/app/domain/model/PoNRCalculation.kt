@@ -20,9 +20,6 @@ data class PoNRCalculation(
     /** Commute duration in minutes */
     val commuteMinutes: Int,
     
-    /** Preparation/grooming duration in minutes */
-    val prepMinutes: Int,
-    
     /** Safety buffer in minutes */
     val bufferMinutes: Int,
     
@@ -33,13 +30,19 @@ data class PoNRCalculation(
     val deltaMinutes: Int,
     
     /** Current persona stage based on delta */
-    val personaStage: PersonaStage
+    /** Current persona stage based on delta */
+    val personaStage: PersonaStage,
+
+    /**
+     * Data quality of the calculation.
+     */
+    val dataQuality: PoNRDataQuality = PoNRDataQuality.GOOD
 ) {
     /**
-     * Total preparation time (commute + prep + buffer).
+     * Total preparation time (commute + buffer).
      */
     val totalPrepMinutes: Int
-        get() = commuteMinutes + prepMinutes + bufferMinutes
+        get() = commuteMinutes + bufferMinutes
     
     /**
      * Whether user is past the Point of No Return.
@@ -63,4 +66,18 @@ data class PoNRCalculation(
             "−${Math.abs(deltaMinutes)}m"
         }
     }
+}
+
+/**
+ * Quality of the data used for PoNR calculation.
+ */
+enum class PoNRDataQuality {
+    /** High accuracy real-time data (GPS) */
+    GOOD,
+    
+    /** Low accuracy real-time data (>100m accuracy) */
+    COARSE,
+    
+    /** Old/Persisted data (No real-time signal) */
+    STALE
 }

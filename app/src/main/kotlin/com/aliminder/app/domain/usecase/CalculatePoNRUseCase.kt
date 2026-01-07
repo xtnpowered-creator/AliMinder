@@ -24,26 +24,37 @@ class CalculatePoNRUseCase @Inject constructor(
     /**
      * Calculate PoNR for a duty with given user settings.
      */
+    /**
+     * Calculate PoNR for a duty with given user settings.
+     */
+    /**
+     * Calculate PoNR for a duty with given user settings.
+     */
     suspend operator fun invoke(
         duty: Duty,
         currentLocation: android.location.Location?,
-        userHomeAddress: Address?,
-        userWorkAddress: Address?,
-        defaultPrepMinutes: Int,
         defaultBufferMinutes: Int,
         urgencyThresholdMinutes: Int
     ): PoNRCalculation {
         
-        // 1. Calculate travel time
-        val commuteMinutes = calculateCommuteTime(duty, currentLocation, userHomeAddress, userWorkAddress)
+        // Optimize: If it's a generic "Task" (not an event with a location), assume 0 travel time
+        // unless it explicitly has a location set.
+        val isTask = duty.category?.contains("Task", ignoreCase = true) == true
+        val skipTravelCalc = isTask && duty.location.isNullOrBlank()
+
+        // 1. Calculate travel time & determine quality
+        val (commuteMinutes, dataQuality) = if (skipTravelCalc) {
+            0 to PoNRDataQuality.GOOD // No travel needed, so it's "Good" (definitive)
+        } else {
+            calculateCommuteTime(duty, currentLocation)
+        }
         
-        // 2. Get prep and buffer (custom or default)
-        val prepMinutes = duty.customPrepMinutes ?: defaultPrepMinutes
+        // 2. Get buffer (custom or default)
         val bufferMinutes = duty.customBufferMinutes ?: defaultBufferMinutes
         
         // 3. Calculate PoNR time
-        val totalPrepTime = commuteMinutes + prepMinutes + bufferMinutes
-        val ponrTime = duty.startTime.minusMinutes(totalPrepTime.toLong())
+        val totalDeduction = commuteMinutes + bufferMinutes
+        val ponrTime = duty.startTime.minusMinutes(totalDeduction.toLong())
         
         // 4. Calculate delta (minutes until PoNR)
         val now = LocalDateTime.now()
@@ -58,75 +69,85 @@ class CalculatePoNRUseCase @Inject constructor(
         )
         
         Log.d(TAG, "PoNR calculated for '${duty.title}': " +
-                "commute=$commuteMinutes, prep=$prepMinutes, buffer=$bufferMinutes, " +
+                "commute=$commuteMinutes ($dataQuality), buffer=$bufferMinutes, " +
                 "ponr=$ponrTime, delta=$delta, stage=$personaStage")
         
         return PoNRCalculation(
             eventId = duty.id,
             eventTime = duty.startTime,
             commuteMinutes = commuteMinutes,
-            prepMinutes = prepMinutes,
             bufferMinutes = bufferMinutes,
             ponrTime = ponrTime,
             deltaMinutes = delta,
-            personaStage = personaStage
+            personaStage = personaStage,
+            dataQuality = dataQuality
         )
     }
     
     /**
      * Calculate commute time with smart fallback logic.
+     * Returns a Pair: (CommuteMinutes, DataQuality)
      * 
      * Priority:
-     * 1. Custom override (if user set it)
-     * 2. Google Maps API with current GPS location as origin
-     * 3. Zero (if no destination or API fails)
+     * 1. Custom override (Good)
+     * 2. Fresh GPS/Network Calculation (Good/Coarse)
+     * 3. Fallback to Persisted Value (Stale)
+     * 4. Zero (Stale/Default)
      */
     private suspend fun calculateCommuteTime(
         duty: Duty,
-        currentLocation: android.location.Location?,
-        userHomeAddress: Address?,
-        userWorkAddress: Address?
-    ): Int {
+        currentLocation: android.location.Location?
+    ): Pair<Int, PoNRDataQuality> {
         // No physical location = no commute needed
         if (duty.location.isNullOrBlank()) {
-            return 0
+            return 0 to PoNRDataQuality.GOOD
         }
 
-        // Check if custom commute time is set
+        // Custom override is always considered "Good" (User intent)
         if (duty.customCommuteMinutes != null && duty.customCommuteMinutes > 0) {
-            return duty.customCommuteMinutes
+            return duty.customCommuteMinutes to PoNRDataQuality.GOOD
         }
 
-        // If no current GPS location available, return 0
-        if (currentLocation == null) {
-            return 0
+        // --- Try Fresh Calculation ---
+        if (currentLocation != null) {
+            // Determine accuracy quality
+            val isCoarse = currentLocation.accuracy > 100 // >100m is considered coarse
+            val quality = if (isCoarse) PoNRDataQuality.COARSE else PoNRDataQuality.GOOD
+            
+            try {
+                val origin = "${currentLocation.latitude},${currentLocation.longitude}"
+                val bearing = if (currentLocation.hasBearing()) {
+                    currentLocation.bearing.toDouble()
+                } else {
+                    null
+                }
+                
+                val apiResult = travelTimeService.calculateTravelTime(
+                    destination = duty.location,
+                    origin = origin,
+                    heading = bearing
+                )
+                
+                if (apiResult != null && apiResult > 0) {
+                    Log.d(TAG, "Fresh API travel time: $apiResult min via ${if(isCoarse) "Coarse" else "Fine"} loc")
+                    return apiResult to quality
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Fresh travel calculation failed", e)
+                // Continue to fallback
+            }
         }
 
-        // Call Google Maps API with current lat/lng and bearing
-        return try {
-            val origin = "${currentLocation.latitude},${currentLocation.longitude}"
-            val bearing = if (currentLocation.hasBearing()) {
-                currentLocation.bearing.toDouble()
-            } else {
-                null
-            }
-            
-            val apiResult = travelTimeService.calculateTravelTime(
-                destination = duty.location,
-                origin = origin,
-                heading = bearing
-            )
-            
-            if (apiResult != null && apiResult > 0) {
-                Log.d(TAG, "Using API-calculated travel time: $apiResult min from GPS (${currentLocation.latitude},${currentLocation.longitude}) with bearing ${bearing ?: "none"} to ${duty.location}")
-                apiResult
-            } else {
-                0
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error calculating travel time from current location", e)
-            0
+        // --- Fallback to Persisted Data ---
+        if (duty.lastCalculatedCommuteMinutes != null && duty.lastCalculatedCommuteMinutes > 0) {
+            Log.w(TAG, "Using STALE persisted travel time: ${duty.lastCalculatedCommuteMinutes} min")
+            return duty.lastCalculatedCommuteMinutes to PoNRDataQuality.STALE
         }
+
+        // --- Last Resort ---
+        // We have no location, no API result, and no history.
+        // We must return 0, but flag it as STALE so the user knows it's unverified.
+        return 0 to PoNRDataQuality.STALE
     }
     /**
      * Determine persona stage based on delta and start time.

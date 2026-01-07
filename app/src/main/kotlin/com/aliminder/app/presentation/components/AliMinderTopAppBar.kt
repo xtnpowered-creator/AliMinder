@@ -26,20 +26,9 @@ import com.aliminder.app.presentation.theme.WearyYellow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AliMinderTopAppBar(
-    title: String,
-    overallStage: PersonaStage?,
-    useDynamicColor: Boolean
+    title: String
 ) {
-    val topBarColor = if (useDynamicColor) {
-        when (overallStage) {
-            PersonaStage.WEARY -> WearyYellow
-            PersonaStage.URGENT -> UrgentOrange
-            PersonaStage.LATE -> LateRed
-            else -> MaterialTheme.colorScheme.background
-        }
-    } else {
-        MaterialTheme.colorScheme.background
-    }
+    val topBarColor = MaterialTheme.colorScheme.background
 
     Column {
         CenterAlignedTopAppBar(

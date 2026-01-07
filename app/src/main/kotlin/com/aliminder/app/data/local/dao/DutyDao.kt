@@ -47,4 +47,7 @@ interface DutyDao {
     
     @Query("UPDATE duties SET dismissal_reason = 'USER_HIDDEN' WHERE id = :dutyId")
     suspend fun denyDuty(dutyId: String)
+
+    @Query("UPDATE duties SET last_calculated_commute_minutes = :minutes WHERE id = :dutyId")
+    suspend fun updateLastCalculatedCommute(dutyId: String, minutes: Int)
 }

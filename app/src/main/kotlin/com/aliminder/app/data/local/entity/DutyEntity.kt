@@ -24,5 +24,9 @@ data class DutyEntity(
     val isAllDay: Boolean = false,
     val isDeleted: Boolean = false, // For soft deletes (Legacy, maybe can be removed or kept for backward comp)
     @ColumnInfo(name = "dismissal_reason")
-    val dismissalReason: String? = null // COMPLETED, CANCELLED, USER_HIDDEN, AUTO_HIDDEN
+    val dismissalReason: String? = null, // COMPLETED, CANCELLED, USER_HIDDEN, AUTO_HIDDEN
+    @ColumnInfo(name = "last_calculated_commute_minutes")
+    val lastCalculatedCommuteMinutes: Int? = null,
+    @ColumnInfo(name = "virtual_meeting_link")
+    val virtualMeetingLink: String? = null
 )

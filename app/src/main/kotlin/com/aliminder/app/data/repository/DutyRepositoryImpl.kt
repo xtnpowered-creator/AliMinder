@@ -4,6 +4,7 @@ import android.util.Log
 import com.aliminder.app.data.local.dao.DutyDao
 import com.aliminder.app.data.local.dao.UserSettingsDao
 import com.aliminder.app.data.mapper.toDomainDuty
+import com.aliminder.app.data.mapper.toDutyEntity
 import com.aliminder.app.domain.model.DismissalReason
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.repository.DutyRepository
@@ -63,16 +64,30 @@ class DutyRepositoryImpl @Inject constructor(
                     .map { entity ->
                         val duty = entity.toDomainDuty()
                         
-                        // Calculate PoNR with current location
+                            // Calculate PoNR with current location
+                            // Calculate PoNR with DataQuality logic
                         val ponr = calculatePoNRUseCase(
                             duty = duty,
                             currentLocation = currentLocation,
-                            userHomeAddress = userSettings.homeAddress,
-                            userWorkAddress = userSettings.workAddress,
-                            defaultPrepMinutes = userSettings.defaultPrepMinutes,
+                            // defaultPrepMinutes removed
                             defaultBufferMinutes = userSettings.defaultBufferMinutes,
                             urgencyThresholdMinutes = userSettings.urgencyTimeThreshold
                         )
+                        
+                        // PERSISTENCE: If we calculated a fresh commute time (GOOD/COARSE),
+                        // and it differs SIGNIFICANTLY from what we have stored, update the database.
+                        // We use a threshold (JITTER) to prevent infinite loops where slight GPS drift
+                        // triggers a DB update -> which triggers a flow re-emission -> which triggers a new calc -> loop.
+                        val diff = kotlin.math.abs(ponr.commuteMinutes - (entity.lastCalculatedCommuteMinutes ?: 0))
+                        val isSignificantChange = diff > 2 // 2 minutes threshold
+                        
+                        if (ponr.dataQuality != com.aliminder.app.domain.model.PoNRDataQuality.STALE &&
+                            isSignificantChange) {
+                            
+                            // Side-effect: Update DB. 
+                            Log.d(TAG, "Persisting new commute time for '${duty.title}': ${ponr.commuteMinutes} min (was ${entity.lastCalculatedCommuteMinutes})")
+                            dutyDao.updateLastCalculatedCommute(duty.id, ponr.commuteMinutes)
+                        }
                         
                         duty.copy(ponr = ponr)
                     }
@@ -119,5 +134,14 @@ class DutyRepositoryImpl @Inject constructor(
     
     override suspend fun denyDuty(dutyId: String) {
         dutyDao.denyDuty(dutyId)
+    }
+
+    override suspend fun deleteAllDuties() {
+        dutyDao.clearAll()
+    }
+
+    override suspend fun insertAll(duties: List<Duty>) {
+        val entities = duties.map { it.toDutyEntity() }
+        dutyDao.insertAll(entities)
     }
 }

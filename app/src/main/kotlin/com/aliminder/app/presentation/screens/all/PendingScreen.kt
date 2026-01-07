@@ -40,16 +40,14 @@ fun PendingScreen(
 ) {
     // Observe state from ViewModel
     val allDuties by viewModel.duties.collectAsState()
-    val overallStage by viewModel.overallStage.collectAsState()
     val userSettings by settingsViewModel.userSettings.collectAsState()
 
     // Filter for Pending items
-    val pendingDuties = allDuties.filter { it.category == "Pending" }
+    // Handle null (loading) by returning null
+    val pendingDuties = allDuties?.filter { it.category == "Pending" }
 
     PendingScreenContent(
         pendingDuties = pendingDuties,
-        overallStage = overallStage,
-        useDynamicColor = userSettings.useDynamicTitleBarColor,
         homeAddress = userSettings.homeAddress,
         workAddress = userSettings.workAddress,
         onSetLocation = viewModel::updateDutyLocation,
@@ -60,73 +58,22 @@ fun PendingScreen(
 
 @Composable
 fun PendingScreenContent(
-    pendingDuties: List<Duty>,
-    overallStage: PersonaStage,
-    useDynamicColor: Boolean,
+    pendingDuties: List<Duty>?, // Nullable
     homeAddress: com.aliminder.app.domain.model.Address?,
     workAddress: com.aliminder.app.domain.model.Address?,
     onSetLocation: (String, String) -> Unit = { _, _ -> },
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
-    var selectedDuty by remember { mutableStateOf<Duty?>(null) }
-    Scaffold(
-        topBar = {
-            AliMinderTopAppBar(
-                title = "Pending Invites",
-                overallStage = overallStage,
-                useDynamicColor = useDynamicColor
-            )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(pendingDuties) { pendingDuty ->
-                DutyCard(
-                    duty = pendingDuty,
-                    onCardClick = { selectedDuty = it }
-                )
-            }
-
-            if (pendingDuties.isEmpty()) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(32.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "No pending invites",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    // Duty Detail Modal
-    selectedDuty?.let { duty ->
-        DutyDetailModal(
-            duty = duty,
-            homeAddress = homeAddress,
-            workAddress = workAddress,
-            onSetLocation = onSetLocation,
-            onAcceptDuty = onAcceptDuty,
-            onDenyDuty = onDenyDuty,
-            onDismiss = { selectedDuty = null }
-        )
-    }
+    SharedDutyListContent(
+        title = "Pending Invites",
+        duties = pendingDuties,
+        emptyStateMessage = "No pending invites",
+        homeAddress = homeAddress,
+        workAddress = workAddress,
+        onDismissDuty = { _, _ -> }, // Pending items might not support dismissal directly in this view, or we can add it
+        onSetLocation = onSetLocation,
+        onAcceptDuty = onAcceptDuty,
+        onDenyDuty = onDenyDuty
+    )
 }

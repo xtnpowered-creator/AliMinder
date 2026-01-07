@@ -18,9 +18,9 @@ import androidx.core.view.WindowCompat
 
 // Using available colors from Color.kt
 private val DarkColorScheme = darkColorScheme(
-    primary = VinylPurple,
+    primary = AliBlue,
     onPrimary = TextPrimary,
-    primaryContainer = VinylPurpleVariant,
+    primaryContainer = AliBlueVariant,
     onPrimaryContainer = TextPrimary,
     
     secondary = TealAccent,
@@ -49,9 +49,9 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = VinylPurple,
+    primary = AliBlue,
     onPrimary = TextPrimary,
-    primaryContainer = VinylPurpleVariant,
+    primaryContainer = AliBlueVariant,
     onPrimaryContainer = TextPrimary,
     
     secondary = TealAccent,
