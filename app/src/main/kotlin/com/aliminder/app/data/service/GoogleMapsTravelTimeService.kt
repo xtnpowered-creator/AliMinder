@@ -13,75 +13,84 @@ import javax.inject.Singleton
 @Singleton
 class GoogleMapsTravelTimeService @Inject constructor() {
     
-    private val api: DistanceMatrixApi by lazy {
+    private val api: RoutesApi by lazy {
         Retrofit.Builder()
-            .baseUrl("https://maps.googleapis.com/maps/api/")
+            .baseUrl("https://routes.googleapis.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(DistanceMatrixApi::class.java)
+            .create(RoutesApi::class.java)
     }
     
     /**
      * Calculate travel time in minutes from origin to destination.
      * 
-     * @param destination Destination address or place name
-     * @param origin Origin address (default: current location placeholder)
-     * @param heading Optional bearing/heading in degrees (0-360) to prevent wrong-side-of-road errors
+     * @param destination Destination address
+     * @param origin Origin coordinates format "lat,lng"
+     * @param heading Optional bearing/heading in degrees (0-360)
      * @return Travel time in minutes, or null if API call fails
      */
     suspend fun calculateTravelTime(
         destination: String,
-        origin: String = "current+location",
+        origin: String,
         heading: Double? = null
     ): Int? {
         return try {
-            // Log API key (first/last 4 chars only for security)
             val apiKey = BuildConfig.GOOGLE_MAPS_API_KEY
-            val keyPreview = if (apiKey.length > 8) {
-                "${apiKey.take(4)}...${apiKey.takeLast(4)}"
-            } else {
-                "INVALID_OR_EMPTY"
-            }
-            Log.d(TAG, "API Key loaded: $keyPreview")
-            Log.d(TAG, "Calling API: origin='$origin', destination='$destination', heading=${heading ?: "none"}")
             
-            val response = api.getDistanceMatrix(
-                origins = origin,
-                destinations = destination,
-                mode = "driving",
-                departureTime = null, // Not using for now
-                trafficModel = null,  // Can't use without departureTime
+            // Parse origin coordinates
+            val originParts = origin.split(",")
+            val originLocation = if (originParts.size == 2) {
+                try {
+                    val lat = originParts[0].trim().toDouble()
+                    val lng = originParts[1].trim().toDouble()
+                    // Create LocationPoint with optional heading
+                    RouteLocation(
+                        location = LocationPoint(
+                            latLng = LatLng(lat, lng),
+                            heading = heading?.toInt()
+                        )
+                    )
+                } catch (e: NumberFormatException) {
+                    Log.w(TAG, "Invalid origin format '$origin'. formatting as address.")
+                    RouteLocation(address = origin)
+                }
+            } else {
+                RouteLocation(address = origin)
+            }
+
+            val request = ComputeRoutesRequest(
+                origin = originLocation,
+                destination = RouteLocation(address = destination),
+                travelMode = "DRIVE",
+                routingPreference = "TRAFFIC_AWARE"
+            )
+
+            Log.d(TAG, "Calling Routes API: origin=$originLocation, dest='$destination'")
+
+            val response = api.computeRoutes(
+                request = request,
                 apiKey = apiKey
             )
             
-            Log.d(TAG, "API Response status: ${response.status}")
-            
-            // Check API response status
-            if (response.status != "OK") {
-                Log.e(TAG, "Distance Matrix API error: ${response.status}")
+            val route = response.routes?.firstOrNull()
+            if (route == null) {
+                Log.e(TAG, "Routes API returned no routes")
                 return null
             }
             
-            // Extract duration from response
-            val element = response.rows.firstOrNull()?.elements?.firstOrNull()
-            if (element?.status != "OK") {
-                Log.e(TAG, "Element status error: ${element?.status}")
-                return null
-            }
-            
-            // Prefer duration_in_traffic if available, otherwise use duration
-            val durationSeconds = element.durationInTraffic?.valueSeconds 
-                ?: element.duration?.valueSeconds
+            // Duration comes as "1234s"
+            val durationString = route.duration // Traffic aware duration
+            val durationSeconds = durationString?.trimEnd('s')?.toLongOrNull()
             
             if (durationSeconds == null) {
-                Log.e(TAG, "No duration data in response")
+                Log.e(TAG, "Invalid duration format: $durationString")
                 return null
             }
             
             // Convert seconds to minutes (round up)
-            val minutes = (durationSeconds + 59) / 60
+            val minutes = ((durationSeconds + 59) / 60).toInt()
             
-            Log.d(TAG, "Travel time calculated: $minutes minutes from '$origin' to '$destination'")
+            Log.d(TAG, "Travel time calculated: $minutes minutes ($durationString)")
             return minutes
             
         } catch (e: Exception) {
