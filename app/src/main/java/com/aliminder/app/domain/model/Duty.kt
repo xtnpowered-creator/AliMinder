@@ -38,11 +38,8 @@ data class Duty(
     /** Duty end time */
     val endTime: LocalDateTime,
     
-    /** Location/venue (legacy string) */
+    /** Location/venue */
     val location: String? = null,
-    
-    /** Structured Address (Preferred for 3-line display and accuracy) */
-    val structuredLocation: Address? = null,
     
     /** Provider source */
     val provider: DutyProvider,

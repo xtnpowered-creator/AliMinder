@@ -35,17 +35,6 @@ fun DutyEntity.toDomainDuty(): Duty {
         startTime = startTime,
         endTime = endTime,
         location = location,
-        structuredLocation = if (locationStreet != null && locationCity != null && locationState != null && locationZip != null) {
-            com.aliminder.app.domain.model.Address(
-                name = locationName,
-                street = locationStreet,
-                city = locationCity,
-                state = locationState,
-                zipCode = locationZip
-            )
-        } else {
-            null
-        },
         provider = provider,
         customCommuteMinutes = customCommuteMinutes,
         // customPrepMinutes ignored
@@ -70,11 +59,6 @@ fun Duty.toDutyEntity(): DutyEntity {
         startTime = startTime,
         endTime = endTime,
         location = location,
-        locationName = structuredLocation?.name,
-        locationStreet = structuredLocation?.street,
-        locationCity = structuredLocation?.city,
-        locationState = structuredLocation?.state,
-        locationZip = structuredLocation?.zipCode,
         provider = provider,
         providerDutyId = id, // Assuming the domain ID is the provider ID for now
         sourceType = sourceTag ?: category ?: "SHADOW_EVENT", // Prefer sourceTag

@@ -68,7 +68,6 @@ fun AllScreen(
         workAddress = userSettings.workAddress,
         onDismissDuty = viewModel::dismissDuty,
         onSetLocation = viewModel::updateDutyLocation,
-        onSetStructuredLocation = viewModel::updateDutyStructuredLocation,
         onAcceptDuty = viewModel::acceptDuty,
         onDenyDuty = viewModel::denyDuty
     )
@@ -82,7 +81,6 @@ fun AllScreenContent(
     workAddress: com.aliminder.app.domain.model.Address?,
     onDismissDuty: (Duty, DismissalReason) -> Unit,
     onSetLocation: (String, String) -> Unit = { _, _ -> },
-    onSetStructuredLocation: (String, com.aliminder.app.domain.model.Address) -> Unit = { _, _ -> },
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
@@ -94,7 +92,6 @@ fun AllScreenContent(
         workAddress = workAddress,
         onDismissDuty = onDismissDuty,
         onSetLocation = onSetLocation,
-        onSetStructuredLocation = onSetStructuredLocation,
         onAcceptDuty = onAcceptDuty,
         onDenyDuty = onDenyDuty
     )

@@ -15,9 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userSettingsRepository: UserSettingsRepository,
-    private val dutyRepository: com.aliminder.app.domain.repository.DutyRepository,
-    private val geofenceService: com.aliminder.app.domain.service.GeofenceService,
-    private val locationService: com.aliminder.app.domain.service.LocationService
+    private val dutyRepository: com.aliminder.app.domain.repository.DutyRepository
 ) : ViewModel() {
 
     val userSettings: StateFlow<UserSettings> = userSettingsRepository.getUserSettings()
@@ -26,16 +24,6 @@ class SettingsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = UserSettings()
         )
-
-    private val _currentLocation = kotlinx.coroutines.flow.MutableStateFlow<android.location.Location?>(null)
-    val currentLocation: StateFlow<android.location.Location?> = _currentLocation
-
-    fun fetchCurrentLocation() {
-        viewModelScope.launch {
-            val location = locationService.getLastKnownLocation()
-            _currentLocation.value = location
-        }
-    }
 
 
 
@@ -54,22 +42,12 @@ class SettingsViewModel @Inject constructor(
     fun setHomeAddress(address: com.aliminder.app.domain.model.Address) {
         viewModelScope.launch {
             userSettingsRepository.setHomeAddress(address)
-            // Update geofences (use new home, existing work)
-            geofenceService.setupGeofences(
-                homeAddress = address,
-                workAddress = userSettings.value.workAddress
-            )
         }
     }
 
     fun setWorkAddress(address: com.aliminder.app.domain.model.Address) {
         viewModelScope.launch {
             userSettingsRepository.setWorkAddress(address)
-            // Update geofences (use existing home, new work)
-            geofenceService.setupGeofences(
-                homeAddress = userSettings.value.homeAddress,
-                workAddress = address
-            )
         }
     }
 

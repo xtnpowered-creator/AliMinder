@@ -355,32 +355,16 @@ fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltView
 
     var defaultBuffer by remember { mutableIntStateOf(userSettings.defaultBufferMinutes) }
     
-    // Address Entry State
-    var showAddressEntry by remember { mutableStateOf(false) }
-    var addressEntryType by remember { mutableStateOf<String?>(null) } // "home" or "work"
+    // Address fields
+    var homeStreet by remember { mutableStateOf(userSettings.homeAddress?.street ?: "") }
+    var homeCity by remember { mutableStateOf(userSettings.homeAddress?.city ?: "") }
+    var homeState by remember { mutableStateOf(userSettings.homeAddress?.state ?: "") }
+    var homeZip by remember { mutableStateOf(userSettings.homeAddress?.zipCode ?: "") }
     
-    val currentLocation by viewModel.currentLocation.collectAsState()
-    
-    if (showAddressEntry && addressEntryType != null) {
-        val currentAddress = if (addressEntryType == "home") userSettings.homeAddress else userSettings.workAddress
-        
-        com.aliminder.app.presentation.components.AddressEntryModal(
-            title = if (addressEntryType == "home") "Set Home Address" else "Set Work Address",
-            contextText = "Used for geofencing (leaving ${addressEntryType}) and commute calculations.",
-            initialAddress = currentAddress,
-            suggestedName = if (addressEntryType == "home") "Home" else "Work",
-            biasLocation = currentLocation,
-            onSave = { address ->
-                if (addressEntryType == "home") {
-                    viewModel.setHomeAddress(address)
-                } else {
-                    viewModel.setWorkAddress(address)
-                }
-                showAddressEntry = false
-            },
-            onDismiss = { showAddressEntry = false }
-        )
-    }
+    var workStreet by remember { mutableStateOf(userSettings.workAddress?.street ?: "") }
+    var workCity by remember { mutableStateOf(userSettings.workAddress?.city ?: "") }
+    var workState by remember { mutableStateOf(userSettings.workAddress?.state ?: "") }
+    var workZip by remember { mutableStateOf(userSettings.workAddress?.zipCode ?: "") }
     
     Column(
         modifier = Modifier
@@ -391,35 +375,117 @@ fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltView
         Text("Addresses", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Locations for smart geofencing and commute estimates.",
+            "Used for geofencing and smart commute detection. Leave blank if not needed.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Home Address Card
-        AddressCard(
-            title = "Home Address",
-            address = userSettings.homeAddress,
-            onEdit = { 
-                viewModel.fetchCurrentLocation()
-                addressEntryType = "home"
-                showAddressEntry = true 
-            }
+        // Home Address
+        Text("Home Address", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = homeStreet,
+            onValueChange = { homeStreet = it },
+            label = { Text("Street") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = homeCity,
+                onValueChange = { homeCity = it },
+                label = { Text("City") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = homeState,
+                onValueChange = { homeState = it },
+                label = { Text("State") },
+                modifier = Modifier.weight(0.5f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = homeZip,
+            onValueChange = { homeZip = it },
+            label = { Text("ZIP Code") },
+            modifier = Modifier.fillMaxWidth(0.5f)
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                viewModel.setHomeAddress(
+                    com.aliminder.app.domain.model.Address(
+                        street = homeStreet.takeIf { it.isNotBlank() } ?: "",
+                        city = homeCity.takeIf { it.isNotBlank() } ?: "",
+                        state = homeState.takeIf { it.isNotBlank() } ?: "",
+                        zipCode = homeZip.takeIf { it.isNotBlank() } ?: ""
+                    )
+                )
+            },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Save Home Address")
+        }
         
-        // Work Address Card
-        AddressCard(
-            title = "Work Address",
-            address = userSettings.workAddress,
-            onEdit = { 
-                viewModel.fetchCurrentLocation()
-                addressEntryType = "work"
-                showAddressEntry = true 
-            }
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Work Address
+        Text("Work Address", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = workStreet,
+            onValueChange = { workStreet = it },
+            label = { Text("Street") },
+            modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = workCity,
+                onValueChange = { workCity = it },
+                label = { Text("City") },
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedTextField(
+                value = workState,
+                onValueChange = { workState = it },
+                label = { Text("State") },
+                modifier = Modifier.weight(0.5f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedTextField(
+            value = workZip,
+            onValueChange = { workZip = it },
+            label = { Text("ZIP Code") },
+            modifier = Modifier.fillMaxWidth(0.5f)
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                viewModel.setWorkAddress(
+                    com.aliminder.app.domain.model.Address(
+                        street = workStreet.takeIf { it.isNotBlank() } ?: "",
+                        city = workCity.takeIf { it.isNotBlank() } ?: "",
+                        state = workState.takeIf { it.isNotBlank() } ?: "",
+                        zipCode = workZip.takeIf { it.isNotBlank() } ?: ""
+                    )
+                )
+            },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Save Work Address")
+        }
         
         Spacer(modifier = Modifier.height(32.dp))
         HorizontalDivider()
@@ -428,10 +494,13 @@ fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltView
         Text("Default Parameters", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            "Travel time is calculated automatically via Google Maps (Routes API).",
+            "Travel time is calculated automatically via Google Maps or set per-duty.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        
         Spacer(modifier = Modifier.height(16.dp))
         
         Row(
@@ -449,48 +518,6 @@ fun PoNRsTab(userSettings: UserSettings, viewModel: SettingsViewModel = hiltView
             valueRange = 0f..30f,
             steps = 5
         )
-    }
-}
-
-@Composable
-fun AddressCard(
-    title: String,
-    address: com.aliminder.app.domain.model.Address?,
-    onEdit: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(4.dp))
-                if (address != null) {
-                    Text(
-                        text = address.toDisplayString(),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                } else {
-                    Text(
-                        text = "Not set",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                    )
-                }
-            }
-            
-            androidx.compose.material3.IconButton(onClick = onEdit) {
-                 androidx.compose.material3.Icon(Icons.Default.ChevronRight, contentDescription = "Edit")
-            }
-        }
     }
 }
 

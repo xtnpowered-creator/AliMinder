@@ -34,9 +34,6 @@ android {
             "GOOGLE_MAPS_API_KEY",
             "\"${properties.getProperty("GOOGLE_MAPS_API_KEY", "")}\""
         )
-        
-        // Inject API Key into Manifest
-        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY", "")
     }
 
     buildTypes {
@@ -182,9 +179,6 @@ dependencies {
     
     // Biometric Authentication
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
-    
-    // Google Places SDK (New)
-    implementation("com.google.android.libraries.places:places:4.1.0")
     
     // Microsoft Graph API
     implementation("com.microsoft.graph:microsoft-graph:5.80.0")
