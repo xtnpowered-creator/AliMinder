@@ -161,6 +161,26 @@ fun DutyDetailModal(
                             
                             Spacer(modifier = Modifier.height(8.dp))
                             
+                            // Virtual Meeting Display
+                            if (duty.virtualMeetingLink != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Phone,
+                                        contentDescription = "Virtual Meeting",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = duty.virtualMeetingLink, // e.g. "Microsoft Teams Meeting"
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
                             // Location if set
                             val displayLocation = duty.structuredLocation?.toDisplayString() 
                                 ?: duty.location?.let { Address.parse(it).toDisplayString() }
@@ -179,25 +199,6 @@ fun DutyDetailModal(
                                     Text(
                                         text = displayLocation,
                                         style = MaterialTheme.typography.bodyLarge
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                            } else if (duty.virtualMeetingLink != null) {
-                                // Virtual Meeting Display
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Phone,
-                                        contentDescription = "Virtual Meeting",
-                                        modifier = Modifier.size(20.dp),
-                                        tint = Color.White
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = duty.virtualMeetingLink, // e.g. "Microsoft Teams Meeting"
-                                        style = MaterialTheme.typography.bodyLarge
-                                        // color removed to use default onSurface for readability
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))

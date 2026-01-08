@@ -36,7 +36,9 @@ android {
         )
         
         // Inject API Key into Manifest
-        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = properties.getProperty("GOOGLE_MAPS_API_KEY", "")
+        // Use a dummy value if missing to prevent "Resources Linking Failed" during build (Key is checked at runtime by Google)
+        val apiKey = properties.getProperty("GOOGLE_MAPS_API_KEY")
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = if (apiKey.isNullOrBlank()) "YOUR_API_KEY_PLACEHOLDER" else apiKey
     }
 
     buildTypes {
