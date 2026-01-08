@@ -64,6 +64,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
     override suspend fun setHomeAddress(address: Address) {
         val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
         userSettingsDao.insert(currentSettings.copy(
+            homeName = address.name,
             homeStreet = address.street,
             homeCity = address.city,
             homeState = address.state,
@@ -77,6 +78,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
     override suspend fun setWorkAddress(address: Address) {
         val currentSettings = userSettingsDao.getUserSettings().first() ?: UserSettingsEntity()
         userSettingsDao.insert(currentSettings.copy(
+            workName = address.name,
             workStreet = address.street,
             workCity = address.city,
             workState = address.state,
@@ -113,10 +115,10 @@ fun UserSettingsEntity.toDomainModel(): UserSettings {
         urgencyTimeThreshold = urgencyTimeThreshold,
         autoHideOverdueMinutes = autoHideOverdueMinutes,
         homeAddress = if (homeStreet != null && homeCity != null && homeState != null && homeZip != null) {
-            Address(homeStreet, homeCity, homeState, homeZip)
+            Address(name = homeName, street = homeStreet, city = homeCity, state = homeState, zipCode = homeZip)
         } else null,
         workAddress = if (workStreet != null && workCity != null && workState != null && workZip != null) {
-            Address(workStreet, workCity, workState, workZip)
+            Address(name = workName, street = workStreet, city = workCity, state = workState, zipCode = workZip)
         } else null
     )
 }
@@ -131,10 +133,12 @@ fun UserSettings.toEntity(): UserSettingsEntity {
 
         urgencyTimeThreshold = urgencyTimeThreshold,
         autoHideOverdueMinutes = autoHideOverdueMinutes,
+        homeName = homeAddress?.name,
         homeStreet = homeAddress?.street,
         homeCity = homeAddress?.city,
         homeState = homeAddress?.state,
         homeZip = homeAddress?.zipCode,
+        workName = workAddress?.name,
         workStreet = workAddress?.street,
         workCity = workAddress?.city,
         workState = workAddress?.state,

@@ -84,6 +84,7 @@ fun RestoreScreen(
             homeAddress = null,
             workAddress = null,
             onSetLocation = { _, _ -> },
+            onSetStructuredLocation = { _, _ -> },
             onAcceptDuty = {},
             onDenyDuty = {},
             onDismiss = { selectedDuty = null }

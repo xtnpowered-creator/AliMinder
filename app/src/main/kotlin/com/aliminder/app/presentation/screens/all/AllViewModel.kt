@@ -7,17 +7,20 @@ import com.aliminder.app.domain.model.DismissalReason
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.PersonaStage
 import com.aliminder.app.domain.repository.DutyRepository
+import com.aliminder.app.domain.repository.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AllViewModel @Inject constructor(
     private val dutyRepository: DutyRepository,
+    private val userSettingsRepository: UserSettingsRepository,
     private val databaseInitializer: DatabaseInitializer
 ) : ViewModel() {
 
@@ -46,6 +49,10 @@ class AllViewModel @Inject constructor(
         // Seed the database on first launch
         viewModelScope.launch {
             databaseInitializer.initialize()
+            
+            // Auto-hide overdue duties on startup
+            val settings = userSettingsRepository.getUserSettings().first()
+            dutyRepository.autoHideOverdueDuties(settings.autoHideOverdueMinutes)
         }
     }
     
@@ -58,6 +65,12 @@ class AllViewModel @Inject constructor(
     fun updateDutyLocation(dutyId: String, location: String) {
         viewModelScope.launch {
             dutyRepository.updateDutyLocation(dutyId, location)
+        }
+    }
+    
+    fun updateDutyStructuredLocation(dutyId: String, address: com.aliminder.app.domain.model.Address) {
+        viewModelScope.launch {
+            dutyRepository.updateDutyStructuredLocation(dutyId, address)
         }
     }
 

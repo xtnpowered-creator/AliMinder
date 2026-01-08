@@ -54,7 +54,9 @@ fun SharedDutyListContent(
     homeAddress: Address?,
     workAddress: Address?,
     onDismissDuty: (Duty, DismissalReason) -> Unit,
+
     onSetLocation: (String, String) -> Unit = { _, _ -> },
+    onSetStructuredLocation: (String, Address) -> Unit = { _, _ -> },
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
@@ -160,6 +162,7 @@ fun SharedDutyListContent(
             homeAddress = homeAddress,
             workAddress = workAddress,
             onSetLocation = onSetLocation,
+            onSetStructuredLocation = onSetStructuredLocation,
             onAcceptDuty = onAcceptDuty,
             onDenyDuty = onDenyDuty,
             onDismiss = { selectedDuty = null }

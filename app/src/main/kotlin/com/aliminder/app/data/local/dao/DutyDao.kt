@@ -39,6 +39,9 @@ interface DutyDao {
     @Query("UPDATE duties SET location = :location WHERE id = :dutyId")
     suspend fun updateLocation(dutyId: String, location: String)
 
+    @Query("UPDATE duties SET location = :location, location_name = :name, location_street = :street, location_city = :city, location_state = :state, location_zip = :zip WHERE id = :dutyId")
+    suspend fun updateStructuredLocation(dutyId: String, location: String, name: String?, street: String?, city: String?, state: String?, zip: String?)
+
     @Query("UPDATE duties SET customCommuteMinutes = :commuteMinutes WHERE id = :dutyId")
     suspend fun updateCustomCommute(dutyId: String, commuteMinutes: Int)
     
