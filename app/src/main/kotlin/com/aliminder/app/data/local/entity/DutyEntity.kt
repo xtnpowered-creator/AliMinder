@@ -14,6 +14,14 @@ data class DutyEntity(
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
     val location: String? = null,
+    
+    // Structured Address Fields
+    @ColumnInfo(name = "location_name") val locationName: String? = null,
+    @ColumnInfo(name = "location_street") val locationStreet: String? = null,
+    @ColumnInfo(name = "location_city") val locationCity: String? = null,
+    @ColumnInfo(name = "location_state") val locationState: String? = null,
+    @ColumnInfo(name = "location_zip") val locationZip: String? = null,
+    
     val provider: DutyProvider,
     val providerDutyId: String, // The ID from the original source (e.g., M365 event ID)
     val sourceType: String, // e.g., M365_CALENDAR_EVENT, SHADOW_TASK

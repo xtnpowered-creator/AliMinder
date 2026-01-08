@@ -10,7 +10,7 @@ import com.aliminder.app.data.local.entity.UserSettingsEntity
 
 @Database(
     entities = [DutyEntity::class, UserSettingsEntity::class],
-    version = 6, // Incremented for virtualLink
+    version = 8, // Incremented for address name fields
     exportSchema = false
 )
 @TypeConverters(Converters::class)

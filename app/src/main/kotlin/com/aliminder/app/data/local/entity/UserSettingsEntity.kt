@@ -17,12 +17,14 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "auto_hide_overdue_minutes") val autoHideOverdueMinutes: Int = 120, // Default 2 hours (120 minutes). Options: 30, 60, 120, 180
     
     // Home Address (structured)
+    @ColumnInfo(name = "home_name") val homeName: String? = null,
     @ColumnInfo(name = "home_street") val homeStreet: String? = null,
     @ColumnInfo(name = "home_city") val homeCity: String? = null,
     @ColumnInfo(name = "home_state") val homeState: String? = null,
     @ColumnInfo(name = "home_zip") val homeZip: String? = null,
     
     // Work Address (structured)
+    @ColumnInfo(name = "work_name") val workName: String? = null,
     @ColumnInfo(name = "work_street") val workStreet: String? = null,
     @ColumnInfo(name = "work_city") val workCity: String? = null,
     @ColumnInfo(name = "work_state") val workState: String? = null,

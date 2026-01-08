@@ -124,6 +124,18 @@ class DutyRepositoryImpl @Inject constructor(
         dutyDao.updateLocation(dutyId, location.trim())
     }
 
+    override suspend fun updateDutyStructuredLocation(dutyId: String, address: com.aliminder.app.domain.model.Address) {
+        dutyDao.updateStructuredLocation(
+            dutyId = dutyId,
+            location = address.toGoogleMapsFormat(), // Keep legacy field in sync
+            name = address.name,
+            street = address.street,
+            city = address.city,
+            state = address.state,
+            zip = address.zipCode
+        )
+    }
+
     override suspend fun updateDutyCustomCommute(dutyId: String, commuteMinutes: Int) {
         dutyDao.updateCustomCommute(dutyId, commuteMinutes)
     }

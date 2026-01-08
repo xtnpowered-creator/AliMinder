@@ -60,6 +60,7 @@ fun DutyDetailModal(
     homeAddress: Address?,
     workAddress: Address?,
     onSetLocation: (String, String) -> Unit,
+    onSetStructuredLocation: (String, Address) -> Unit,
     onAcceptDuty: (String) -> Unit,
     onDenyDuty: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -161,19 +162,22 @@ fun DutyDetailModal(
                             Spacer(modifier = Modifier.height(8.dp))
                             
                             // Location if set
-                            if (duty.location != null) {
+                            val displayLocation = duty.structuredLocation?.toDisplayString() 
+                                ?: duty.location?.let { Address.parse(it).toDisplayString() }
+
+                            if (displayLocation != null) {
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.Top
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.LocationOn,
                                         contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
+                                        modifier = Modifier.size(20.dp).padding(top = 2.dp),
                                         tint = Color.White
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = duty.location,
+                                        text = displayLocation,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                 }
@@ -237,28 +241,27 @@ fun DutyDetailModal(
                 }
             }
     }    
-    // Address entry dialog
+    // Address entry dialog (Now using Google Places)
     if (showAddressEntry) {
-        AddressEntryDialog(
+        AddressEntryModal(
             title = addressEntryTitle,
             contextText = addressEntryContext,
+            // initialAddress = null, // TODO: Pass current address if editing
             onSave = { address ->
                 when (addressEntryType) {
                     "home" -> {
-                        // Save to user settings for future use
                         settingsViewModel.setHomeAddress(address)
                         // Also apply to current duty
-                        onSetLocation(duty.id, address.toGoogleMapsFormat())
+                        onSetStructuredLocation(duty.id, address)
                     }
                     "work" -> {
-                        // Save to user settings for future use
                         settingsViewModel.setWorkAddress(address)
                         // Also apply to current duty
-                        onSetLocation(duty.id, address.toGoogleMapsFormat())
+                        onSetStructuredLocation(duty.id, address)
                     }
                     "other" -> {
-                        // Only apply to current duty (don't save to settings)
-                        onSetLocation(duty.id, address.toGoogleMapsFormat())
+                        // Apply to duty
+                        onSetStructuredLocation(duty.id, address)
                     }
                 }
                 showAddressEntry = false
