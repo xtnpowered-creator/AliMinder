@@ -10,10 +10,10 @@ import com.aliminder.app.data.local.entity.UserSettingsEntity
 
 @Database(
     entities = [DutyEntity::class, UserSettingsEntity::class],
-    version = 8, // Incremented for address name fields
+    version = 9, // Incremented for Rich Duty Details (Organizer, Checklist, etc.)
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(AliMinderTypeConverters::class)
 abstract class AliMinderDatabase : RoomDatabase() {
     abstract fun dutyDao(): DutyDao
     abstract fun userSettingsDao(): UserSettingsDao

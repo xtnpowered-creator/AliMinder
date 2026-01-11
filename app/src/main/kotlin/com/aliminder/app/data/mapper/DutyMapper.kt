@@ -58,7 +58,23 @@ fun DutyEntity.toDomainDuty(): Duty {
         dismissalReason = dismissalReason?.let { runCatching { DismissalReason.valueOf(it) }.getOrNull() } 
             ?: if (isDeleted) DismissalReason.USER_HIDDEN else null,
         lastCalculatedCommuteMinutes = lastCalculatedCommuteMinutes,
-        virtualMeetingLink = virtualMeetingLink
+        virtualMeetingLink = virtualMeetingLink,
+        priority = try { com.aliminder.app.domain.model.DutyPriority.valueOf(priority) } catch (e: Exception) { com.aliminder.app.domain.model.DutyPriority.NORMAL },
+        attendees = attendees?.let { json -> 
+            try { 
+                val type = object : com.google.gson.reflect.TypeToken<List<com.aliminder.app.domain.model.Attendee>>() {}.type
+                com.google.gson.Gson().fromJson(json, type) 
+            } catch(e: Exception) { emptyList() }
+        } ?: emptyList(),
+        organizer = organizer?.let { json ->
+            try { com.google.gson.Gson().fromJson(json, com.aliminder.app.domain.model.Attendee::class.java) } catch(e: Exception) { null }
+        },
+        checklist = checklist?.let { json ->
+            try {
+                val type = object : com.google.gson.reflect.TypeToken<List<com.aliminder.app.domain.model.ChecklistItem>>() {}.type
+                com.google.gson.Gson().fromJson(json, type)
+            } catch(e: Exception) { emptyList() }
+        } ?: emptyList()
     )
 }
 
@@ -86,6 +102,10 @@ fun Duty.toDutyEntity(): DutyEntity {
         isDeleted = isDismissed,
         dismissalReason = dismissalReason?.name,
         lastCalculatedCommuteMinutes = lastCalculatedCommuteMinutes,
-        virtualMeetingLink = virtualMeetingLink
+        virtualMeetingLink = virtualMeetingLink,
+        priority = priority.name,
+        attendees = if (attendees.isNotEmpty()) com.google.gson.Gson().toJson(attendees) else null,
+        organizer = if (organizer != null) com.google.gson.Gson().toJson(organizer) else null,
+        checklist = if (checklist.isNotEmpty()) com.google.gson.Gson().toJson(checklist) else null
     )
 }

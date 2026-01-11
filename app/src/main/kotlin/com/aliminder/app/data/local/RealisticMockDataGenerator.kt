@@ -39,7 +39,9 @@ object RealisticMockDataGenerator {
             durationMin = 60,
             location = LOC_SITE_RIVERTOWN,
             sourceType = "MS-CAL",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            organizerName = "Mike (Site Super)",
+            attendees = listOf("Abe's Plumbing (Vendor)", "Mike (Site Super)")
         ))
 
         // 2. TODAY
@@ -51,7 +53,9 @@ object RealisticMockDataGenerator {
             durationMin = 60,
             location = LOC_YOGA_STUDIO,
             sourceType = "GW-CAL",
-            provider = DutyProvider.GOOGLE_WORKSPACE
+            provider = DutyProvider.GOOGLE_WORKSPACE,
+            description = "Start the day centered. Remember mat and water.",
+            priority = "HIGH"
         ))
 
         // Work: Department Lunch (Event)
@@ -62,7 +66,10 @@ object RealisticMockDataGenerator {
             durationMin = 90,
             location = LOC_LUNCH_WORK,
             sourceType = "MS-CAL",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "<b>Agenda:</b><br/>- Review Q1 Budget<br/>- Vendor Comparisons<br/>- Team celebrations",
+            organizerName = "Sarah (VP Purchasing)",
+            attendees = listOf("Sarah (VP Purchasing)", "Tom (Estimating)", "Lisa (Admin)", "Mike (Site Super)")
         ))
 
         // Work: Site Visit (Event)
@@ -73,7 +80,11 @@ object RealisticMockDataGenerator {
             durationMin = 90,
             location = LOC_SITE_RIVERTOWN,
             sourceType = "MS-CAL",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "Inspect framing progress on lots 45-52. Verify lumber quality matches PO specs.",
+            priority = "HIGH",
+            organizerName = "Mike (Site Super)",
+            attendees = listOf("Mike (Site Super)", "Lumber84 Rep (Vendor)")
         ))
 
         // Work Task: Estimating
@@ -82,7 +93,9 @@ object RealisticMockDataGenerator {
             dueDate = referenceDate,
             dueTime = LocalTime.of(16, 0),
             sourceType = "MS-TODO",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            priority = "HIGH",
+            checklistItems = listOf("Download latest futures report", "Compare against Q1 baseline", "Update spreadsheet")
         ))
         
         // Work Task: Vendor Proposals
@@ -91,7 +104,10 @@ object RealisticMockDataGenerator {
             dueDate = referenceDate,
             dueTime = LocalTime.of(17, 30),
             sourceType = "MS-TODO",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "Need to compare: 1. Gold Bond, 2. USG, 3. CertainTeed.\nFocus on delivery timelines.",
+            priority = "HIGH",
+            checklistItems = listOf("Check insurance compliance", "Call references for Gold Bond", "Verify delivery capacity")
         ))
         
         // Personal: Dinner
@@ -102,7 +118,11 @@ object RealisticMockDataGenerator {
             durationMin = 120,
             location = LOC_DINNER_BBQ,
             sourceType = "GW-CAL",
-            provider = DutyProvider.GOOGLE_WORKSPACE
+            provider = DutyProvider.GOOGLE_WORKSPACE,
+            description = "Catch up with John and Linda. Discuss summer vacation plans.",
+            priority = "NORMAL",
+            organizerName = "Linda Miller",
+            attendees = listOf("Linda Miller", "John Miller", "Alisara (You)")
         ))
 
         // 3. UPCOMING
@@ -116,7 +136,11 @@ object RealisticMockDataGenerator {
             location = null, // No physical location!
             virtualLink = "Microsoft Teams Meeting", // Explicit remote link
             sourceType = "MS-CAL",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "Weekly leadership sync. Prepare status on Rivertown land acquisition.",
+            priority = "HIGH",
+            organizerName = "CEO",
+            attendees = listOf("CEO", "VP Construction", "VP Sales", "Alisara (You)", "VP Land")
         ))
 
         // Work: Site Selection
@@ -127,7 +151,10 @@ object RealisticMockDataGenerator {
             durationMin = 120,
             location = "Celina, TX", 
             sourceType = "MS-CAL",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "Drive surrounding areas. assess school district proximity.",
+            organizerName = "Me",
+            attendees = listOf("VP Land", "Alisara (You)")
         ))
         
         // Work Task: PO Issuance
@@ -136,7 +163,8 @@ object RealisticMockDataGenerator {
             dueDate = referenceDate.plusDays(1),
             dueTime = LocalTime.of(15, 0),
             sourceType = "MS-TODO",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            checklistItems = listOf("Verify totals", "Get VP approval", "Send to Accounting")
         ))
         
         // Work Task: Planner Item (MS-PLAN)
@@ -145,7 +173,10 @@ object RealisticMockDataGenerator {
             dueDate = referenceDate.plusDays(2),
             dueTime = LocalTime.of(14, 0),
             sourceType = "MS-PLAN",
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "Ensure all delays from rain requests are accounted for.",
+            priority = "NORMAL",
+            checklistItems = listOf("Phase 1 Complete", "Phase 2 Permits Approved", "Materials Ordered")
         ))
         
         // Pending: Change Order
@@ -156,7 +187,11 @@ object RealisticMockDataGenerator {
             durationMin = 0,
             location = null,
             sourceType = "MS-TEAM", 
-            provider = DutyProvider.MICROSOFT_365
+            provider = DutyProvider.MICROSOFT_365,
+            description = "Urgent approval needed for new shingle color selection.",
+            priority = "HIGH",
+            organizerName = "System",
+            attendees = listOf("Purchasing", "Construction")
         ).copy(acceptanceStatus = "PENDING"))
 
 
@@ -171,7 +206,10 @@ object RealisticMockDataGenerator {
                     durationMin = 15,
                     location = LOC_WORK_FARMERS_BRANCH,
                     sourceType = "MS-CAL",
-                    provider = DutyProvider.MICROSOFT_365
+                    provider = DutyProvider.MICROSOFT_365,
+                    description = "Key blockers and daily goals.",
+                    organizerName = "Me",
+                    attendees = listOf("Tom", "Lisa", "Raj")
                 ))
             }
         }
@@ -184,7 +222,11 @@ object RealisticMockDataGenerator {
             durationMin = 180,
             location = LOC_GRADUATION,
             sourceType = "GW-CAL",
-            provider = DutyProvider.GOOGLE_WORKSPACE
+            provider = DutyProvider.GOOGLE_WORKSPACE,
+            description = "Arrive early for parking. Bring camera.",
+            priority = "HIGH",
+            organizerName = "UT Dallas",
+            attendees = listOf("Alisara", "Husband", "Grandma")
         ))
 
         // Personal Task: Birthday
@@ -193,7 +235,8 @@ object RealisticMockDataGenerator {
             dueDate = referenceDate.plusDays(2),
             dueTime = LocalTime.of(17, 0),
             sourceType = "GW-TASK",
-            provider = DutyProvider.GOOGLE_WORKSPACE
+            provider = DutyProvider.GOOGLE_WORKSPACE,
+            checklistItems = listOf("Select flavor", "Write message", "Pay deposit")
         ))
         
         // Weekend Trip
@@ -202,7 +245,8 @@ object RealisticMockDataGenerator {
             dueDate = referenceDate.plusDays(3),
             dueTime = LocalTime.of(20, 0),
             sourceType = "GW-TASK",
-            provider = DutyProvider.GOOGLE_WORKSPACE
+            provider = DutyProvider.GOOGLE_WORKSPACE,
+            checklistItems = listOf("Check Airbnb availability", "Coordinate dates with Millers", "Book")
         ))
 
         return duties
@@ -216,9 +260,44 @@ object RealisticMockDataGenerator {
         location: String?,
         sourceType: String,
         provider: DutyProvider,
-        virtualLink: String? = null // New parameter
+        virtualLink: String? = null,
+        description: String? = null,
+        priority: String = "NORMAL",
+        organizerName: String? = "Me",
+        attendees: List<String> = emptyList() // Simple names for mock convenience
     ): DutyEntity {
         val start = LocalDateTime.of(date, time)
+        
+        // Mock Attendees Logic
+        val attendeeObjects = attendees.map { name ->
+             // Simple logic to guess internal/external based on name
+             val isExternal = name.contains("Vendor") || name.contains("Ext")
+             com.aliminder.app.domain.model.Attendee(
+                 name = name,
+                 email = "${name.replace(" ", ".").lowercase()}@${if(isExternal) "partner.com" else "mattamyhomes.com"}",
+                 status = "ACCEPTED",
+                 isOrganizer = false
+             )
+        }
+        
+        val organizer = if (organizerName != "Me") {
+             com.aliminder.app.domain.model.Attendee(
+                 name = organizerName!!,
+                 email = "${organizerName.replace(" ", ".").lowercase()}@mattamyhomes.com",
+                 status = "ACCEPTED",
+                 isOrganizer = true
+             )
+        } else {
+             // If "Me", we set null as organizer (implied self) or explicit "Me"?
+             // Let's set explicit "Me" so UI has data
+             com.aliminder.app.domain.model.Attendee(
+                 name = "Alisara (You)",
+                 email = "alisara@mattamyhomes.com",
+                 status = "ACCEPTED",
+                 isOrganizer = true
+             )
+        }
+
         return DutyEntity(
             id = UUID.randomUUID().toString(),
             title = title,
@@ -228,8 +307,12 @@ object RealisticMockDataGenerator {
             provider = provider,
             providerDutyId = UUID.randomUUID().toString(),
             sourceType = sourceType,
-            acceptanceStatus = "ACCEPTED", // Default
-            virtualMeetingLink = virtualLink
+            acceptanceStatus = "ACCEPTED", 
+            virtualMeetingLink = virtualLink,
+            description = description,
+            priority = priority,
+            organizer = com.google.gson.Gson().toJson(organizer),
+            attendees = com.google.gson.Gson().toJson(attendeeObjects)
         )
     }
 
@@ -238,20 +321,33 @@ object RealisticMockDataGenerator {
         dueDate: LocalDate,
         dueTime: LocalTime,
         sourceType: String,
-        provider: DutyProvider
+        provider: DutyProvider,
+        description: String? = null,
+        priority: String = "NORMAL",
+        checklistItems: List<String> = emptyList()
     ): DutyEntity {
         val due = LocalDateTime.of(dueDate, dueTime)
+        
+        val checklistObjects = checklistItems.mapIndexed { index, text ->
+            com.aliminder.app.domain.model.ChecklistItem(
+                id = UUID.randomUUID().toString(),
+                text = text,
+                isCompleted = index == 0 // Mock: First item always done
+            )
+        }
+
         return DutyEntity(
             id = UUID.randomUUID().toString(),
             title = title,
-            startTime = due, // For tasks, startTime often equals due time in this model or createdTime? 
-            // In AliMinder Duty model, startTime is "Due Time" for tasks usually, or "Do Date".
-            // Let's assume startTime = deadline for sorting purposes in the unified list.
+            startTime = due,
             endTime = due,
             provider = provider,
             providerDutyId = UUID.randomUUID().toString(),
             sourceType = sourceType,
-            acceptanceStatus = "ACCEPTED"
+            acceptanceStatus = "ACCEPTED",
+            description = description,
+            priority = priority,
+            checklist = com.google.gson.Gson().toJson(checklistObjects)
         )
     }
 }

@@ -107,6 +107,19 @@ class CalculatePoNRUseCase @Inject constructor(
         if (duty.customCommuteMinutes != null && duty.customCommuteMinutes > 0) {
             return duty.customCommuteMinutes to PoNRDataQuality.GOOD
         }
+        
+        // --- Horizon Check: Is this event relevant yet? ---
+        // If the event is > 4 hours away, DO NOT waste API calls recalculating travel time.
+        // We just return the last known (Stale) value or 0.
+        // This prevents "Driving to Work" from updating "Dinner" (10 hours away) every minute.
+        val hoursUntilStart = java.time.Duration.between(LocalDateTime.now(), duty.startTime).toHours()
+        if (hoursUntilStart > 4) {
+             if (duty.lastCalculatedCommuteMinutes != null && duty.lastCalculatedCommuteMinutes > 0) {
+                 // Log.v(TAG, "Skipping fresh calc for distant event '${duty.title}' (>4h). Using stale value.")
+                 return duty.lastCalculatedCommuteMinutes to PoNRDataQuality.STALE
+             }
+             return 0 to PoNRDataQuality.STALE
+        }
 
         // --- Try Fresh Calculation ---
         if (currentLocation != null) {
@@ -128,9 +141,17 @@ class CalculatePoNRUseCase @Inject constructor(
                     heading = bearing
                 )
                 
-                if (apiResult != null && apiResult > 0) {
-                    Log.d(TAG, "Fresh API travel time: $apiResult min via ${if(isCoarse) "Coarse" else "Fine"} loc")
-                    return apiResult to quality
+                if (apiResult != null) {
+                    // ARRIVAL SNAPPING:
+                    // If we are within 200 meters, we are "Arrived".
+                    // Force commute time to 0 to prevent "Last Mile" driving instructions (e.g. 3 mins for 50 ft).
+                    if (apiResult.distanceMeters < 200) {
+                        Log.d(TAG, "Arrival Snapped: <200m (${apiResult.distanceMeters}m). Zeroing commute time.")
+                        return 0 to PoNRDataQuality.GOOD
+                    }
+                    
+                    Log.d(TAG, "Fresh API travel time: ${apiResult.minutes} min / ${apiResult.distanceMeters}m via ${if(isCoarse) "Coarse" else "Fine"} loc")
+                    return apiResult.minutes to quality
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Fresh travel calculation failed", e)

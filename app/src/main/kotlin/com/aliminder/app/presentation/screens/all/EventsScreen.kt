@@ -63,7 +63,7 @@ fun EventsScreen(
         homeAddress = userSettings.homeAddress,
         workAddress = userSettings.workAddress,
         onDismissDuty = viewModel::dismissDuty,
-        onSetLocation = viewModel::updateDutyLocation,
+        onSetStructuredLocation = viewModel::updateDutyStructuredLocation,
         onAcceptDuty = viewModel::acceptDuty,
         onDenyDuty = viewModel::denyDuty
     )
@@ -76,7 +76,7 @@ fun EventsScreenContent(
     homeAddress: com.aliminder.app.domain.model.Address?,
     workAddress: com.aliminder.app.domain.model.Address?,
     onDismissDuty: (Duty, DismissalReason) -> Unit = { _, _ -> },
-    onSetLocation: (String, String) -> Unit = { _, _ -> },
+    onSetStructuredLocation: (String, com.aliminder.app.domain.model.Address) -> Unit = { _, _ -> },
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
@@ -87,7 +87,7 @@ fun EventsScreenContent(
         homeAddress = homeAddress,
         workAddress = workAddress,
         onDismissDuty = onDismissDuty,
-        onSetLocation = onSetLocation,
+        onSetStructuredLocation = onSetStructuredLocation,
         onAcceptDuty = onAcceptDuty,
         onDenyDuty = onDenyDuty
     )

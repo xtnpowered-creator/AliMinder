@@ -19,16 +19,28 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.aliminder.app.domain.service.LocationService
+import com.aliminder.app.data.service.GoogleMapsTravelTimeService
+
+import kotlinx.coroutines.CoroutineScope
+import com.aliminder.app.di.ApplicationScope
+import com.google.gson.Gson
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @Singleton
 class DutyRepositoryImpl @Inject constructor(
     private val dutyDao: DutyDao,
     private val userSettingsDao: UserSettingsDao,
     private val userSettingsRepository: com.aliminder.app.domain.repository.UserSettingsRepository,
-    private val locationService: com.aliminder.app.domain.service.LocationService,
-    private val calculatePoNRUseCase: CalculatePoNRUseCase
+    private val locationService: LocationService,
+    private val calculatePoNRUseCase: CalculatePoNRUseCase,
+    private val googleMapsTravelTimeService: GoogleMapsTravelTimeService, // For direct usage if needed
+
+    @ApplicationScope private val scope: CoroutineScope
 ) : DutyRepository {
 
+    private val gson = Gson()
 
     override fun getAllDuties(): Flow<List<Duty>> {
         // Per LOCATION_PLAN: Use reactive polling via LocationService updates
@@ -38,6 +50,8 @@ class DutyRepositoryImpl @Inject constructor(
                 // Trigger recalculation on either DB change OR location update
                 entities to location
             }
+            // .onEach - TRIGGER REMOVED due to billing hazard.
+            // Enrichment must be an explicit, one-time action, not reactive to GPS.
             .map { (entities, locationUpdate) ->
                 // Get user settings for PoNR calculation
                 val userSettings = userSettingsRepository.getUserSettings().first()
@@ -58,44 +72,55 @@ class DutyRepositoryImpl @Inject constructor(
                     Log.w(TAG, "No location available - travel times will be 0")
                 }
                 
+                // Variable to track the minimum time to PoNR across all duties
+                var minMinutesToPoNR: Int? = null
+
                 // Filter and map to domain with PoNR calculation
                 val dutiesWithPoNR = entities
                     .filter { it.dismissalReason == null && !it.isDeleted }
                     .map { entity ->
                         val duty = entity.toDomainDuty()
                         
-                            // Calculate PoNR with current location
-                            // Calculate PoNR with DataQuality logic
+                        // Calculate PoNR with DataQuality logic
                         val ponr = calculatePoNRUseCase(
                             duty = duty,
                             currentLocation = currentLocation,
-                            // defaultPrepMinutes removed
                             defaultBufferMinutes = userSettings.defaultBufferMinutes,
                             urgencyThresholdMinutes = userSettings.urgencyTimeThreshold
                         )
                         
-                        // PERSISTENCE: If we calculated a fresh commute time (GOOD/COARSE),
-                        // and it differs SIGNIFICANTLY from what we have stored, update the database.
-                        // We use a threshold (JITTER) to prevent infinite loops where slight GPS drift
-                        // triggers a DB update -> which triggers a flow re-emission -> which triggers a new calc -> loop.
+                        // PERSISTENCE: Update DB if significant change
                         val diff = kotlin.math.abs(ponr.commuteMinutes - (entity.lastCalculatedCommuteMinutes ?: 0))
-                        val isSignificantChange = diff > 2 // 2 minutes threshold
+                        val isSignificantChange = diff > 2 
                         
                         if (ponr.dataQuality != com.aliminder.app.domain.model.PoNRDataQuality.STALE &&
                             isSignificantChange) {
-                            
-                            // Side-effect: Update DB. 
-                            Log.d(TAG, "Persisting new commute time for '${duty.title}': ${ponr.commuteMinutes} min (was ${entity.lastCalculatedCommuteMinutes})")
+                            Log.d(TAG, "Persisting new commute time for '${duty.title}': ${ponr.commuteMinutes} min")
                             dutyDao.updateLastCalculatedCommute(duty.id, ponr.commuteMinutes)
                         }
                         
+                        // Check if this is the "nearest" duty (smallest positive delta)
+                        // Ignore duties that are already passed PoNR (negative delta) unless we want to track lateness
+                        // For battery savings, we care about "Upcoming" PoNRs.
+                        if (ponr.deltaMinutes > -60) { // Keep tracking even if slightly late
+                             if (minMinutesToPoNR == null || ponr.deltaMinutes < minMinutesToPoNR!!) {
+                                 minMinutesToPoNR = ponr.deltaMinutes
+                             }
+                        }
+
                         duty.copy(ponr = ponr)
                     }
                 
+                // CRITICAL FIX: The "Broken Chain"
+                // Tell LocationService how urgent the situation is so it can switch to High Accuracy / Real-time
+                locationService.updateNearestDutyPoNRMinutes(minMinutesToPoNR)
+
                 dutiesWithPoNR
             }
     }
     
+
+
     companion object {
         private const val TAG = "DutyRepository"
     }

@@ -20,8 +20,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" /> <!-- Android 14+ -->
     
     <!-- Retained for Upcoming Phases -->
-    <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <!-- Calendar permissions removed as we use direct API integrations (M365/Google) or internal mocks, not the Android Calendar Provider -->
+    <!-- <uses-permission android:name="android.permission.READ_CALENDAR" /> -->
+    <!-- <uses-permission android:name="android.permission.WRITE_CALENDAR" /> -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" tools:replace="android:required" /> <!-- Explicitly mark camera as optional -->
     

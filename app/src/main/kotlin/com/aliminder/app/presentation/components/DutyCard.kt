@@ -60,73 +60,11 @@ fun DutyCard(
         shape = cardShape
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Row(
+            // Shared Header (Squircle + Title + Time)
+            DutyCardHeader(
+                duty = duty,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp), // Tightened vertical padding
-                verticalAlignment = Alignment.CenterVertically, 
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Left Column: Squircle + Source Tag (The "Pedestal")
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    val stage = duty.getPersonaStage()
-                    val deltaValue = Duration.between(LocalDateTime.now(), duty.startTime).toMinutes()
-
-                    StatusRing(
-                        stage = stage,
-                        deltaText = formatEventDelta(deltaValue, stage),
-                        size = 48.dp, // Reduced to 48dp (Compact)
-                        strokeWidth = 5.dp
-                    )
-                    
-                    // Pedestal Text (Source Tag)
-                    duty.sourceTag?.let { tag ->
-                        Spacer(modifier = Modifier.height(2.dp)) // Reduced spacer
-                        Text(
-                            text = tag.uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontSize = 10.sp, 
-                            lineHeight = 10.sp, // Tight line height
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            maxLines = 1
-                        )
-                    }
-                }
-
-                // Right Column: Title + Time
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = duty.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    val isTask = duty.category?.contains("Task", ignoreCase = true) == true
-                    val isToday = duty.startTime.toLocalDate() == java.time.LocalDate.now()
-                    val daySuffix = if (!isToday) {
-                         ", ${duty.startTime.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.US).uppercase()}."
-                    } else ""
-                    
-                    val timeText = if (isTask) {
-                        "Due: ${MockData.formatTime(duty.startTime)}"
-                    } else {
-                        "${MockData.formatTime(duty.startTime)} -- ${MockData.formatTime(duty.endTime)}"
-                    } + daySuffix
-
-                    Text(
-                        text = timeText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            )
 
             // Warning icon if duty needs attention (Overlay)
             if (duty.needsAttention()) {
@@ -143,29 +81,4 @@ fun DutyCard(
     }
 }
 
-private fun formatEventDelta(minutes: Long, stage: PersonaStage): String {
-    val absMinutes = abs(minutes)
-    val days = absMinutes / (24 * 60)
-    val remainingMinutes = absMinutes % (24 * 60)
-    val hours = remainingMinutes / 60
-    val mins = remainingMinutes % 60
 
-    if (stage == PersonaStage.LATE) {
-        return "LATE"
-    }
-    
-    if (stage == PersonaStage.URGENT) {
-        return String.format(Locale.US, "%02d:%02d", hours, mins)
-    }
-
-    return if (minutes >= 0) {
-        if (days > 0) {
-            val dayLabel = if (days == 1L) "day" else "days"
-            String.format(Locale.US, "%d %s", days, dayLabel)
-        } else {
-            String.format(Locale.US, "%02d:%02d", hours, mins)
-        }
-    } else {
-        "LATE"
-    }
-}

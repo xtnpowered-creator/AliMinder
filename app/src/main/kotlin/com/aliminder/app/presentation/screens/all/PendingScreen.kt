@@ -50,7 +50,7 @@ fun PendingScreen(
         pendingDuties = pendingDuties,
         homeAddress = userSettings.homeAddress,
         workAddress = userSettings.workAddress,
-        onSetLocation = viewModel::updateDutyLocation,
+        onSetStructuredLocation = viewModel::updateDutyStructuredLocation,
         onAcceptDuty = viewModel::acceptDuty,
         onDenyDuty = viewModel::denyDuty
     )
@@ -61,7 +61,7 @@ fun PendingScreenContent(
     pendingDuties: List<Duty>?, // Nullable
     homeAddress: com.aliminder.app.domain.model.Address?,
     workAddress: com.aliminder.app.domain.model.Address?,
-    onSetLocation: (String, String) -> Unit = { _, _ -> },
+    onSetStructuredLocation: (String, com.aliminder.app.domain.model.Address) -> Unit = { _, _ -> },
     onAcceptDuty: (String) -> Unit = {},
     onDenyDuty: (String) -> Unit = {}
 ) {
@@ -72,7 +72,7 @@ fun PendingScreenContent(
         homeAddress = homeAddress,
         workAddress = workAddress,
         onDismissDuty = { _, _ -> }, // Pending items might not support dismissal directly in this view, or we can add it
-        onSetLocation = onSetLocation,
+        onSetStructuredLocation = onSetStructuredLocation,
         onAcceptDuty = onAcceptDuty,
         onDenyDuty = onDenyDuty
     )

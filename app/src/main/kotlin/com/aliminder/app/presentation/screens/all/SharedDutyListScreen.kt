@@ -54,11 +54,10 @@ fun SharedDutyListContent(
     homeAddress: Address?,
     workAddress: Address?,
     onDismissDuty: (Duty, DismissalReason) -> Unit,
-
-    onSetLocation: (String, String) -> Unit = { _, _ -> },
     onSetStructuredLocation: (String, Address) -> Unit = { _, _ -> },
     onAcceptDuty: (String) -> Unit = {},
-    onDenyDuty: (String) -> Unit = {}
+    onDenyDuty: (String) -> Unit = {},
+    onToggleChecklistItem: (String, String) -> Unit = { _, _ -> } // Default no-op for now
 ) {
     var dutyToDismiss by remember { mutableStateOf<Duty?>(null) }
     var selectedDuty by remember { mutableStateOf<Duty?>(null) }
@@ -161,10 +160,10 @@ fun SharedDutyListContent(
             duty = liveDuty,
             homeAddress = homeAddress,
             workAddress = workAddress,
-            onSetLocation = onSetLocation,
             onSetStructuredLocation = onSetStructuredLocation,
             onAcceptDuty = onAcceptDuty,
             onDenyDuty = onDenyDuty,
+            onToggleChecklistItem = onToggleChecklistItem,
             onDismiss = { selectedDuty = null }
         )
     }

@@ -36,5 +36,11 @@ data class DutyEntity(
     @ColumnInfo(name = "last_calculated_commute_minutes")
     val lastCalculatedCommuteMinutes: Int? = null,
     @ColumnInfo(name = "virtual_meeting_link")
-    val virtualMeetingLink: String? = null
+    val virtualMeetingLink: String? = null,
+    
+    // Rich Details (JSON or Enum stored as String)
+    val priority: String = "NORMAL", // Storing Enum name
+    val attendees: String? = null,   // JSON
+    val organizer: String? = null,   // JSON
+    val checklist: String? = null    // JSON
 )

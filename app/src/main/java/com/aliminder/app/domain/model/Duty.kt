@@ -81,7 +81,19 @@ data class Duty(
      * Link or description for virtual meetings (e.g., "Microsoft Teams Meeting", Zoom URL).
      * Populated when the event is remote, ensuring simple PoNR calculation (0 travel).
      */
-    val virtualMeetingLink: String? = null
+    val virtualMeetingLink: String? = null,
+
+    /** Priority level (default NORMAL) */
+    val priority: DutyPriority = DutyPriority.NORMAL,
+
+    /** List of attendees (for events) or assignees (for tasks) */
+    val attendees: List<Attendee> = emptyList(),
+
+    /** Organizer/Host of the event */
+    val organizer: Attendee? = null,
+
+    /** Subtasks or checklist items */
+    val checklist: List<ChecklistItem> = emptyList()
 ) {
     /**
      * Whether duty has been dismissed/snoozed.
@@ -113,3 +125,32 @@ data class Duty(
         return customBufferMinutes ?: defaultMinutes
     }
 }
+
+/**
+ * Priority level for a duty.
+ */
+enum class DutyPriority {
+    HIGH,
+    NORMAL,
+    LOW
+}
+
+/**
+ * A person attending an event or assigned to a task.
+ */
+data class Attendee(
+    val name: String,
+    val email: String? = null,
+    val status: String = "ACCEPTED", // ACCEPTED, DECLINED, PENDING, TENTATIVE
+    val isOrganizer: Boolean = false,
+    val isOptional: Boolean = false
+)
+
+/**
+ * A subtask or checklist item within a duty.
+ */
+data class ChecklistItem(
+    val id: String,
+    val text: String,
+    val isCompleted: Boolean = false
+)

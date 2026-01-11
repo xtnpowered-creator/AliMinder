@@ -40,9 +40,11 @@ fun PoNRMathCard(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "PoNR Calculation",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = "PONR CALCULATION",
+            style = MaterialTheme.typography.labelSmall, // Matched to other headers
+            color = androidx.compose.ui.graphics.Color(0xFF81D4FA), // Light Blue
+            fontWeight = FontWeight.Bold,
+            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
         )
         Spacer(modifier = Modifier.height(8.dp))
         

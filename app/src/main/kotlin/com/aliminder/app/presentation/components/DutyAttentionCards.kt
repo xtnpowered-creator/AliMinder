@@ -18,7 +18,7 @@ fun DutyAttentionCards(
     duty: Duty,
     homeAddress: Address?,
     workAddress: Address?,
-    onSetLocation: (String, String) -> Unit,
+    onSetStructuredLocation: (String, Address) -> Unit,
     onAcceptDuty: (String) -> Unit,
     onDenyDuty: (String) -> Unit,
     onDismissModal: () -> Unit,
@@ -59,16 +59,18 @@ fun DutyAttentionCards(
             LocationSuggestionCard(
                 onSelectHome = {
                     if (homeAddress != null) {
-                        onSetLocation(duty.id, homeAddress.toGoogleMapsFormat())
-                        onDismissModal()
+                        // Pass full structured address to preserve Name
+                        onSetStructuredLocation(duty.id, homeAddress)
+                        // Removed onDismissModal() so user can see the result
                     } else {
                         onShowAddressEntry("Enter Home Address", "For: ${duty.title}", "home")
                     }
                 },
                 onSelectWork = {
                     if (workAddress != null) {
-                        onSetLocation(duty.id, workAddress.toGoogleMapsFormat())
-                        onDismissModal()
+                        // Pass full structured address to preserve Name
+                        onSetStructuredLocation(duty.id, workAddress)
+                        // Removed onDismissModal() so user can see the result
                     } else {
                         onShowAddressEntry("Enter Work Address", "For: ${duty.title}", "work")
                     }

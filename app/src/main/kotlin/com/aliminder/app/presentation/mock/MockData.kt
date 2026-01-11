@@ -24,7 +24,8 @@ data class MockEvent(
     // prepMinutes removed
     val bufferMinutes: Int,
     val category: String = "Work",
-    val source: String = "Shadow" // Shadow, M365, Google
+    val source: String = "Shadow", // Shadow, M365, Google
+    val description: String? = null
 ) {
     val ponr: LocalDateTime
         get() = startTime
@@ -96,7 +97,8 @@ object MockData {
             commuteMinutes = 25,
 
             bufferMinutes = 15,
-            category = "Personal"
+            category = "Personal",
+            description = "Dr. Smith. Remember to bring insurance card."
         ),
         
         // OPTIMISTIC - 2+ hours away

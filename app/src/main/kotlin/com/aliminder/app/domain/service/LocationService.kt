@@ -257,11 +257,27 @@ class LocationService @Inject constructor(
      * Update nearest duty PoNR time for Active state batching decisions.
      * Per LOCATION_PLAN: Batching is based on TIME to PoNR, not distance.
      */
+    /**
+     * Update nearest duty PoNR time for Active state batching decisions.
+     * 
+     * CHANGED: This NO LONGER forces a transition to Active state.
+     * Active state is strictly for PHYSICAL MOVEMENT (Activity Recognition).
+     * This method merely updates the Data Context for batching logic IF we are already Active.
+     */
     fun updateNearestDutyPoNRMinutes(minutesToPoNR: Int?) {
         val currentState = _trackingState.value
-        if (currentState is TrackingState.Active && currentState.minutesToNearestDutyPoNR != minutesToPoNR) {
-            Log.d(TAG, "Updating nearest duty PoNR: ${minutesToPoNR ?: "unknown"} minutes away")
-            transitionTo(TrackingState.Active(minutesToPoNR))
+        
+        if (currentState is TrackingState.Active) {
+            // We are driving. Update the urgency to adjust batching freq.
+            if (currentState.minutesToNearestDutyPoNR != minutesToPoNR) {
+                Log.d(TAG, "Updating flow urgency while Active: $minutesToPoNR min")
+                transitionTo(TrackingState.Active(minutesToPoNR))
+            }
+        } else {
+            // We are Sitting Still (Monitoring/Dormant).
+            // Do NOT switch to Active. Saves battery.
+            // We trust the 10-minute Monitoring poll to catch traffic changes.
+            Log.v(TAG, "PoNR Calculated ($minutesToPoNR min) but user is not driving. Staying in $currentState.")
         }
     }
     

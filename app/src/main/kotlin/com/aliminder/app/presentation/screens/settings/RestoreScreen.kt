@@ -83,10 +83,10 @@ fun RestoreScreen(
             duty = duty,
             homeAddress = null,
             workAddress = null,
-            onSetLocation = { _, _ -> },
             onSetStructuredLocation = { _, _ -> },
             onAcceptDuty = {},
             onDenyDuty = {},
+            onToggleChecklistItem = { _, _ -> }, // No-op for dismissed duties
             onDismiss = { selectedDuty = null }
         )
     }

@@ -22,28 +22,81 @@ class GoogleMapsTravelTimeService @Inject constructor() {
     }
     
     /**
-     * Calculate travel time in minutes from origin to destination.
-     * 
-     * @param destination Destination address
-     * @param origin Origin coordinates format "lat,lng"
-     * @param heading Optional bearing/heading in degrees (0-360)
-     * @return Travel time in minutes, or null if API call fails
+     * Result of a travel time calculation.
+     */
+    data class TravelResult(
+        val minutes: Int,
+        val distanceMeters: Int
+    )
+
+    private data class CacheEntry(
+        val result: TravelResult,
+        val timestamp: Long
+    )
+    
+    // In-memory cache: Key -> Entry
+    private val cache = java.util.concurrent.ConcurrentHashMap<String, CacheEntry>()
+    
+    // Throttle maps
+    private val lastCallTime = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    private val lastResultMap = java.util.concurrent.ConcurrentHashMap<String, TravelResult>()
+
+    /**
+     * Calculate travel time and distance from origin to destination.
      */
     suspend fun calculateTravelTime(
         destination: String,
         origin: String,
         heading: Double? = null
-    ): Int? {
+    ): TravelResult? {
+        
+        // 1. Generate Cache Key (Required for both checking and saving)
+        val originKey = try {
+            val parts = origin.split(",")
+            if (parts.size == 2) {
+                val lat = String.format("%.3f", parts[0].toDouble())
+                val lng = String.format("%.3f", parts[1].toDouble())
+                "$lat,$lng"
+            } else origin
+        } catch (e: Exception) { origin }
+        
+        val key = "$originKey|$destination"
+
+        // 2. GLOBAL THROTTLE & CACHE CHECK
+        val lastTime = lastCallTime[destination] ?: 0L
+        val timeSinceLastCall = System.currentTimeMillis() - lastTime
+        
+        // A. Spatial Cache Check (Fastest)
+        val cached = cache[key]
+        if (cached != null) {
+            val age = System.currentTimeMillis() - cached.timestamp
+            if (age < CACHE_TTL_MS) {
+                Log.v(TAG, "Cache HIT (Spatial) for '$destination' (Age: ${age/1000}s)")
+                return cached.result
+            } else {
+                 cache.remove(key) // Expired
+            }
+        }
+        
+        // B. Time Throttle Check (If we missed spatial, but called recently)
+        if (timeSinceLastCall < MIN_INTERVAL_MS) {
+             val lastResult = lastResultMap[destination]
+             if (lastResult != null) {
+                 Log.v(TAG, "Throttle HIT (Time): Returning <60s old result for '$destination'")
+                 return lastResult
+             }
+        }
+
+        // 3. API Call (Cache Miss)
         return try {
             val apiKey = BuildConfig.GOOGLE_MAPS_API_KEY
             
-            // Parse origin coordinates
+            // Parse origin coordinates properly
             val originParts = origin.split(",")
             val originLocation = if (originParts.size == 2) {
                 try {
                     val lat = originParts[0].trim().toDouble()
                     val lng = originParts[1].trim().toDouble()
-                    // Create LocationPoint with optional heading
                     RouteLocation(
                         location = LocationPoint(
                             latLng = LatLng(lat, lng),
@@ -51,7 +104,6 @@ class GoogleMapsTravelTimeService @Inject constructor() {
                         )
                     )
                 } catch (e: NumberFormatException) {
-                    Log.w(TAG, "Invalid origin format '$origin'. formatting as address.")
                     RouteLocation(address = origin)
                 }
             } else {
@@ -65,34 +117,27 @@ class GoogleMapsTravelTimeService @Inject constructor() {
                 routingPreference = "TRAFFIC_AWARE"
             )
 
-            Log.d(TAG, "Calling Routes API: origin=$originLocation, dest='$destination'")
+            Log.d(TAG, "Calling Routes API (MISS): origin=$originLocation, dest='$destination'")
 
-            val response = api.computeRoutes(
-                request = request,
-                apiKey = apiKey
-            )
+            val response = api.computeRoutes(request = request, apiKey = apiKey)
             
-            val route = response.routes?.firstOrNull()
-            if (route == null) {
-                Log.e(TAG, "Routes API returned no routes")
-                return null
-            }
+            val route = response.routes?.firstOrNull() ?: return null
             
-            // Duration comes as "1234s"
-            val durationString = route.duration // Traffic aware duration
-            val durationSeconds = durationString?.trimEnd('s')?.toLongOrNull()
-            
-            if (durationSeconds == null) {
-                Log.e(TAG, "Invalid duration format: $durationString")
-                return null
-            }
-            
-            // Convert seconds to minutes (round up)
+            val durationString = route.duration
+            val durationSeconds = durationString?.trimEnd('s')?.toLongOrNull() ?: return null
             val minutes = ((durationSeconds + 59) / 60).toInt()
+            val distanceMeters = route.distanceMeters ?: 0
             
-            Log.d(TAG, "Travel time calculated: $minutes minutes ($durationString)")
-            return minutes
+            val result = TravelResult(minutes, distanceMeters)
             
+            // 4. Update Caches
+            cache[key] = CacheEntry(result, System.currentTimeMillis())
+            lastCallTime[destination] = System.currentTimeMillis()
+            lastResultMap[destination] = result
+            
+            Log.d(TAG, "Travel result cached: $minutes min / $distanceMeters meters")
+            
+            return result
         } catch (e: Exception) {
             Log.e(TAG, "Error calculating travel time", e)
             null
@@ -101,5 +146,7 @@ class GoogleMapsTravelTimeService @Inject constructor() {
     
     companion object {
         private const val TAG = "GoogleMapsTravelTime"
+        private const val CACHE_TTL_MS = 5 * 60 * 1000L // 5 Minutes
+        private const val MIN_INTERVAL_MS = 60 * 1000L // 1 Minute Hard Throttle
     }
 }

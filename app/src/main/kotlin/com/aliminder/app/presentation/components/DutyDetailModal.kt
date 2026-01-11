@@ -35,19 +35,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aliminder.app.domain.model.Address
 import com.aliminder.app.domain.model.Duty
 import com.aliminder.app.domain.model.getCardEligibility
 import com.aliminder.app.domain.model.PersonaStage
-import com.aliminder.app.domain.model.needsAttention
 import com.aliminder.app.presentation.mock.MockData
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.Locale
-import kotlin.math.abs
 
 /**
  * Expanded duty card modal - appears as large card with margins.
@@ -59,10 +56,10 @@ fun DutyDetailModal(
     duty: Duty,
     homeAddress: Address?,
     workAddress: Address?,
-    onSetLocation: (String, String) -> Unit,
     onSetStructuredLocation: (String, Address) -> Unit,
     onAcceptDuty: (String) -> Unit,
     onDenyDuty: (String) -> Unit,
+    onToggleChecklistItem: (String, String) -> Unit, // New callback
     onDismiss: () -> Unit,
     settingsViewModel: com.aliminder.app.presentation.screens.settings.SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
@@ -90,10 +87,7 @@ fun DutyDetailModal(
             currentTime = LocalDateTime.now()
         }
     }
-    
-    val stage = duty.getPersonaStage()
-    val deltaValue = Duration.between(currentTime, duty.startTime).toMinutes()
-    
+
     // Blue background (app background color)
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -123,59 +117,35 @@ fun DutyDetailModal(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f) // Takes available space
-                                .clickable { onDismiss() } // Tap anywhere in details to dismiss
                                 .verticalScroll(rememberScrollState())
-                                .padding(16.dp)
+                                // Padding removed here to allow header to be edge-to-edge (has internal padding)
                         ) {
-                            // Header with countdown and title
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                StatusRing(
-                                    stage = stage,
-                                    deltaText = formatEventDelta(deltaValue, stage),
-                                    size = 60.dp,
-                                    strokeWidth = 5.dp
-                                )
-                                
-                                Column {
-                                    Text(
-                                        text = duty.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    
-                                    val isTask = duty.category?.contains("Task", ignoreCase = true) == true
-                                    val timeLabel = if (isTask) "Due" else "Start"
-                                    
-                                    Text(
-                                        text = "$timeLabel: ${MockData.formatTime(duty.startTime)}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                            // Shared Header (Consistent with DutyCard)
+                            DutyCardHeader(
+                                duty = duty
+                            )
                             
                             Spacer(modifier = Modifier.height(8.dp))
                             
                             // Virtual Meeting Display
                             if (duty.virtualMeetingLink != null) {
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.Top,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Phone,
-                                        contentDescription = "Virtual Meeting",
-                                        modifier = Modifier.size(20.dp),
-                                        tint = Color.White
+                                    // Anchor Button (Matches Squircle Width)
+                                    AlignmentButton(
+                                        text = "JOIN",
+                                        onClick = { /* TODO: Launch intent */ }
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    
                                     Text(
-                                        text = duty.virtualMeetingLink, // e.g. "Microsoft Teams Meeting"
-                                        style = MaterialTheme.typography.bodyLarge
+                                        text = duty.virtualMeetingLink,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        // Padding removed as requested
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -187,25 +157,88 @@ fun DutyDetailModal(
 
                             if (displayLocation != null) {
                                 Row(
-                                    verticalAlignment = Alignment.Top
+                                    verticalAlignment = Alignment.Top, // Align top so first line is consistent
+                                    modifier = Modifier.padding(horizontal = 16.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.LocationOn,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp).padding(top = 2.dp),
-                                        tint = Color.White
+                                    // Anchor Button (Matches Squircle Width)
+                                    AlignmentButton(
+                                        text = "MAP",
+                                        onClick = { /* TODO: Launch map intent */ }
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    
                                     Text(
                                         text = displayLocation,
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        // Padding removed as requested
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                             
+                            // Description / Body
+                            if (!duty.description.isNullOrBlank()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                ) {
+                                    Text(
+                                        text = "DETAILS",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF81D4FA), // Light Blue
+                                        fontWeight = FontWeight.Bold,
+                                        textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    HtmlText(
+                                        html = duty.description,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            // --- RICH DETAILS ORCHESTRATION ---
+                            // Display Organizer, Attendees, Checklist *below* Description
+
+                            val organizer = duty.organizer
+                            // Filter out organizer from attendees list to avoid duplication if the model includes them in both
+                            val distinctAttendees = duty.attendees.filter { !it.isOrganizer && it.name != organizer?.name }
+
+                            if (organizer != null) {
+                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    OrganizerSection(organizer = organizer)
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            if (distinctAttendees.isNotEmpty()) {
+                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    AttendeesSection(attendees = distinctAttendees)
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            if (duty.checklist.isNotEmpty()) {
+                                Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                    ChecklistSection(
+                                        checklist = duty.checklist,
+                                        onToggleItem = { itemId -> 
+                                            onToggleChecklistItem(duty.id, itemId) 
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            
                             // PoNR Calculation breakdown
-                            PoNRMathCard(duty = duty)
+                            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                PoNRMathCard(duty = duty)
+                            }
                         }
                         
                         // Bottom Section: Attention area - only if any cards qualify
@@ -224,7 +257,7 @@ fun DutyDetailModal(
                                         duty = duty,
                                         homeAddress = homeAddress,
                                         workAddress = workAddress,
-                                        onSetLocation = onSetLocation,
+                                        onSetStructuredLocation = onSetStructuredLocation,
                                         onAcceptDuty = onAcceptDuty,
                                         onDenyDuty = onDenyDuty,
                                         onDismissModal = onDismiss,
@@ -273,29 +306,29 @@ fun DutyDetailModal(
     }
 }
 
-private fun formatEventDelta(minutes: Long, stage: PersonaStage): String {
-    val absMinutes = abs(minutes)
-    val days = absMinutes / (24 * 60)
-    val remainingMinutes = absMinutes % (24 * 60)
-    val hours = remainingMinutes / 60
-    val mins = remainingMinutes % 60
-
-    if (stage == PersonaStage.LATE) {
-        return "LATE"
-    }
-    
-    if (stage == PersonaStage.URGENT) {
-        return String.format(Locale.US, "%02d:%02d", hours, mins)
-    }
-
-    return if (minutes >= 0) {
-        if (days > 0) {
-            val dayLabel = if (days == 1L) "day" else "days"
-            String.format(Locale.US, "%d %s\n%02d:%02d", days, dayLabel, hours, mins)
-        } else {
-            String.format(Locale.US, "%02d:%02d", hours, mins)
-        }
-    } else {
-        "LATE"
+@Composable
+private fun AlignmentButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    androidx.compose.material3.OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(width = 70.dp, height = 32.dp), // Fixed width matches StatusRing (size 48.dp * 1.452 scaling factor ≈ 70.dp)
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+            contentColor = Color.White,
+            containerColor = Color.Transparent
+        ),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp) // Reset padding to fit text
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            fontSize = 10.sp
+        )
     }
 }
+
